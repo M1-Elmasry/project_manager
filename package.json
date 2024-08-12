@@ -1,9 +1,11 @@
 {
   "name": "project_manager",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-server": "nodemon --exec ts-node src/server.ts",
+    "check-typing": "npx tsc --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -11,14 +13,19 @@
   "description": "",
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@types/morgan": "^1.9.9",
     "@types/node": "^22.2.0",
     "eslint": "^9.9.0",
     "globals": "^15.9.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.17.0",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.0.1"
   },
   "dependencies": {
+    "@hono/node-server": "^1.12.0",
     "hono": "^4.5.5",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.8.0"
