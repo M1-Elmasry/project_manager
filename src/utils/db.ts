@@ -1,29 +1,40 @@
-import { MongoClient, Db, Collection } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import { DB_HOST, DB_PORT, DB_NAME } from './constants';
+import type { Db, Collection } from 'mongodb';
+import type { User } from './typing';
 
 class DBClient {
-  private host: string;
-  private port: string;
-  private databaseName: string;
-  public client: MongoClient;
-  public db: Db;
-  public users: Collection;
+  readonly host: string;
+  readonly port: string;
+  readonly databaseName: string;
+
+  public client: MongoClient | null = null;
+  public db: Db | null = null;
+  public users: Collection<User> | null = null;
 
   constructor(host?: string, port?: string, databaseName?: string) {
     this.host = host || DB_HOST;
     this.port = port || DB_PORT;
     this.databaseName = databaseName || DB_NAME;
 
-    MongoClient.connect(
-      `mongodb://${this.host}:${this.port}`,
-      (err, client) => {
-        if (!err) {
-          this.client = client;
-          this.db = client.db(this.databaseName);
-          this.users = this.db.collection('users');
-        }
-      },
-    );
+    MongoClient.connect(`mongodb://${this.host}:${this.port}`)
+      .then((client: MongoClient) => {
+        this.client = client;
+        this.db = this.client.db(this.databaseName);
+        this.users = this.db.collection('users');
+        console.log(`db connected on ${this.host}:${this.port}`)
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  }
+
+  closeConnection() {
+    if (!this.client) {
+      throw new Error('cannot close database connection before connecting');
+    }
+    this.client.close();
+    console.log('db connection closed');
   }
 }
 
