@@ -16,4 +16,3 @@ export const DB_PORT: string = process.env.DB_PORT || '27017';
  * @constant
  */
 export const DB_NAME: string = process.env.DB_NAME || 'files_manager';
-
