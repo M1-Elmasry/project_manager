@@ -1,14 +1,14 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import auth from './routes/authRoutes';
 import { logger } from 'hono/logger';
+import APIRoutes from './routes';
 import { SERVER_HOST, SERVER_PORT } from './utils/constants';
 
 const app = new Hono();
 
 app.use(logger());
 
-app.route('/auth', auth);
+app.route('/', APIRoutes);
 
 serve({
   fetch: app.fetch,

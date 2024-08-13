@@ -1,6 +1,5 @@
-import { Hono } from "hono";
-import AuthController from "../controllers/authControllers";
-
+import { Hono } from 'hono';
+import AuthController from '../controllers/authControllers';
 
 const app = new Hono();
 

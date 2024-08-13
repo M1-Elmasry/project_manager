@@ -1,52 +1,40 @@
 import type { Context } from 'hono';
+import bcrypt from 'bcrypt';
 import dbClient from '../utils/db';
-import type { User } from '../utils/typing';
-import { InsertOneResult, WithId } from 'mongodb';
-import { hash } from 'crypto';
+import { CreateUserSchema } from '../types/auth';
 
 export default class AuthController {
   static async createNewUser(c: Context) {
-    const { username, email, password } = await c.req.json();
+    const payload = await c.req.json();
 
-    if (!username) {
-      c.status(400);
-      return c.json({ error: 'username missing' });
+    // validate user creation payload
+    const parseResults = CreateUserSchema.safeParse(payload);
+    if (!parseResults.success) {
+      console.log(parseResults.error);
+      return c.json({ errors: parseResults.error.errors }, 400);
     }
 
-    if (!email) {
-      c.status(400);
-      return c.json({ error: 'email missing' });
-    }
+    const { email, password, username } = parseResults.data;
 
-    if (!password) {
-      c.status(400);
-      return c.json({ error: 'password missing' });
-    }
-
-    const user: WithId<User> | null | undefined = await dbClient.users?.findOne(
-      { email },
-    );
-
+    // check user existance
+    const user = await dbClient.users?.findOne({ email });
     if (user) {
-      c.status(400);
-      return c.json({ error: 'email already exists' });
+      return c.json({ error: 'email already exists' }, 400);
     }
 
-    const hashedPassword: string = hash('sha256', password).toString();
+    // store hashed password with salt of 10 rounds
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const result: InsertOneResult<User> | undefined =
-      await dbClient.users?.insertOne({
-        username,
-        email,
-        password: hashedPassword,
-      });
+    const insertResults = await dbClient.users?.insertOne({
+      username,
+      email,
+      password: hashedPassword,
+    });
 
-    if (result?.acknowledged) {
-      c.status(201);
-      return c.json({ userId: result.insertedId });
+    if (insertResults?.acknowledged) {
+      return c.json({ userId: insertResults.insertedId }, 201);
     }
 
-    c.status(500);
-    return c.json({ error: 'cannot create new user' });
+    return c.json({ error: 'failed to create user' }, 500);
   }
 }
