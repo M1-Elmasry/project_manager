@@ -1,16 +1,29 @@
 {
   "name": "project_manager",
+  "description": "The backend core for a project manager app",
   "version": "1.0.0",
-  "main": "index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start-server": "nodemon --exec ts-node src/server.ts",
-    "check-typing": "npx tsc --noEmit"
+  "license": "MIT",
+  "keywords": ["server", "backend", "project_manager", "ts"],
+  "author": {
+    "name": "M1-Elmasry",
+    "email": "mostafamfelmasry@outlook.com>",
+    "url": "https://github.com/M1-Elmasry"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "contributors": [
+    {
+      "name": "Davenchy",
+      "email": "firon1222@gmail.com",
+      "url": "https://github.com/Davenchy"
+    }
+  ],
+  "main": "dist/server.js",
+  "scripts": {
+    "start": "node .",
+    "dev": "nodemon src/server.ts",
+    "build": "tsc --build",
+    "typing": "npx tsc --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@types/morgan": "^1.9.9",
