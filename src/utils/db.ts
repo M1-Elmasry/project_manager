@@ -1,7 +1,8 @@
 import { MongoClient } from 'mongodb';
 import { DB_HOST, DB_PORT, DB_NAME } from './constants';
+
 import type { Db, Collection } from 'mongodb';
-import type { User } from './typing';
+import type { User } from '../types/auth';
 
 class DBClient {
   readonly host: string;
@@ -22,7 +23,7 @@ class DBClient {
         this.client = client;
         this.db = this.client.db(this.databaseName);
         this.users = this.db.collection('users');
-        console.log(`db connected on ${this.host}:${this.port}`)
+        console.log(`db connected on ${this.host}:${this.port}`);
       })
       .catch((error) => {
         throw new Error(error);
