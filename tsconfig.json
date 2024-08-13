@@ -106,5 +106,15 @@
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
+    // "paths": {
+    //   "@src/*": ["src/*"],
+    //   "@utils/*": ["src/utils/*"],
+    //   "@type/*": ["src/types/*"],
+    //   "@routes/*": ["src/routes/*"],
+    //   "@controllers/*": ["src/controllers/*"]
+    // }
+  },
+  "ts-node": {
+    "swc": true
   }
 }
