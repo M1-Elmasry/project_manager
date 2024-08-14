@@ -1,10 +1,12 @@
 import { z } from 'zod';
 
-export const CreateUserSchema = z.object({
+export const UserSchema = z.object({
   username: z.string().min(3).max(20),
-  email: z.string().min(6).email(),
+  email: z.string().min(6).max(50).email(),
   password: z.string().min(8),
 });
+
+export const UserCredentialsSchema = UserSchema.omit({ username: true });
 
 /**
  * Represents a user in the project.
@@ -13,7 +15,7 @@ export const CreateUserSchema = z.object({
  * @prop email - The email address (unique).
  * @prop password - The user's password (min length 8).
  */
-export type CreateUser = z.infer<typeof CreateUserSchema>;
+export type User = z.infer<typeof UserSchema>;
 
 /**
  * Database User type.
@@ -22,4 +24,12 @@ export type CreateUser = z.infer<typeof CreateUserSchema>;
  * @prop email - Email Address.
  * @prop password - Hashed Password.
  */
-export type User = CreateUser & {};
+export type UserDocument = User & {};
+
+/**
+ * UserCredentials type for authentication.
+ *
+ * @prop email - The email address of the user.
+ * @prop password - The user's password.
+ */
+ export type UserCredentials = z.infer<typeof UserCredentialsSchema>;
