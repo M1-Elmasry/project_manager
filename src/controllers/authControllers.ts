@@ -1,10 +1,10 @@
 import type { Context } from 'hono';
 import bcrypt from 'bcrypt';
 import dbClient from '../utils/db';
-import { UserSchema, UserCredentialsSchema } from '../types/auth';
+import { User, UserSchema, UserCredentialsSchema } from '../types/auth';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET_KEY } from '../utils/constants';
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithId } from 'mongodb';
 
 export default class AuthController {
   static async createNewUser(c: Context) {
@@ -73,7 +73,13 @@ export default class AuthController {
 
   static async getMe(c: Context) {
     const userId: string = c.get('userId');
-    const user = await dbClient.users?.findOne({ _id: new ObjectId(userId) });
-    return c.json(user, 201);
+    const user = (await dbClient.users?.findOne({
+      _id: new ObjectId(userId),
+    })) as Partial<WithId<User>>;
+
+    delete user.password;
+    delete user._id;
+
+    return c.json({ id: userId, ...user }, 201);
   }
 }
