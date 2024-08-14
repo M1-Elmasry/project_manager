@@ -3,7 +3,12 @@
   "description": "The backend core for a project manager app",
   "version": "1.0.0",
   "license": "MIT",
-  "keywords": ["server", "backend", "project_manager", "ts"],
+  "keywords": [
+    "server",
+    "backend",
+    "project_manager",
+    "ts"
+  ],
   "author": {
     "name": "M1-Elmasry",
     "email": "mostafamfelmasry@outlook.com>",
@@ -29,6 +34,7 @@
     "@swc/core": "^1.7.10",
     "@swc/helpers": "^0.5.12",
     "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.2.0",
     "eslint": "^9.9.0",
@@ -45,6 +51,7 @@
     "bcrypt": "^5.1.1",
     "hono": "^4.5.5",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.8.0"
+    "mongodb": "^6.8.0",
+    "zod": "^3.23.8"
   }
 }
