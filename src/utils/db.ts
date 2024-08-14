@@ -1,8 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { DB_HOST, DB_PORT, DB_NAME } from './constants';
-
 import type { Db, Collection } from 'mongodb';
-import type { User } from '../types/auth';
+import type { UserDocument } from '../types/auth';
 
 class DBClient {
   readonly host: string;
@@ -11,7 +10,7 @@ class DBClient {
 
   public client: MongoClient | null = null;
   public db: Db | null = null;
-  public users: Collection<User> | null = null;
+  public users: Collection<UserDocument> | null = null;
 
   constructor(host?: string, port?: string, databaseName?: string) {
     this.host = host || DB_HOST;
