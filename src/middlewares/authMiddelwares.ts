@@ -1,26 +1,32 @@
-import { Context } from "hono";
+import { Context } from 'hono';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET_KEY } from "../utils/constants";
+import { JWT_SECRET_KEY } from '../utils/constants';
+
+type JWTPayload = {
+  userId: string;
+};
 
 export async function verifyToken(c: Context, next: () => Promise<void>) {
-  const token = c.req.header('Authorization')?.split(' ')[1];
+  const values = c.req.header('Authorization')?.split(' ');
 
-  if (!token) {
-    return c.json({ error: 'token not found' }, 401);
+  if (!values || values.length !== 2 || values[0] !== 'Bearer') {
+    return c.json({ error: 'invalid authorization' }, 401);
   }
+
+  const token = values[1];
 
   try {
-    const payload = jwt.verify(token, JWT_SECRET_KEY);
+    const payload = jwt.verify(token, JWT_SECRET_KEY) as JWTPayload;
+    c.set('userId', payload.userId);
+  } catch (err) {
+    console.error('Invalid Authorization:', err);
 
-    if (typeof payload === 'object') {
-      c.set('userId', payload.userId);
-      await next();
+    if (err instanceof jwt.TokenExpiredError) {
+      return c.json({ error: (err as Error).message }, 401);
     }
 
-  } catch (error) {
-    return c.json({ error }, 401);
+    return c.json({ error: 'invalid token' }, 401);
   }
 
-  // this for when payload be a string, and i really didn't know when !
-  return c.json({ error: 'invalid token'}, 401);
+  return next();
 }

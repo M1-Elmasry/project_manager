@@ -1,10 +1,10 @@
 import type { Context } from 'hono';
 import bcrypt from 'bcrypt';
 import dbClient from '../utils/db';
-import { UserSchema, UserCredentialsSchema } from '../types/auth';
+import { User, UserSchema, UserCredentialsSchema } from '../types/auth';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET_KEY } from '../utils/constants';
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithId } from 'mongodb';
 
 export default class AuthController {
   static async createNewUser(c: Context) {
@@ -43,31 +43,29 @@ export default class AuthController {
   }
 
   static async generateToken(c: Context) {
-     const payload = await c.req.json();
+    const payload = await c.req.json();
 
-     const parseResults = UserCredentialsSchema.safeParse(payload);
-     if (!parseResults.success) {
+    const parseResults = UserCredentialsSchema.safeParse(payload);
+    if (!parseResults.success) {
       console.log(parseResults.error);
       return c.json({ errors: parseResults.error.errors }, 400);
-     }
+    }
 
     const { email, password } = parseResults.data;
 
     const user = await dbClient.users?.findOne({ email });
     if (!user) {
-      // i know it's invalid email only, but this for security reasons
       return c.json({ error: 'invalid email or password' }, 401);
     }
 
-    const correctPass = bcrypt.compare(password, user.password);
+    const correctPass = await bcrypt.compare(password, user.password);
 
     if (!correctPass) {
-      // i know it's invalid password only, but this for security reasons
       return c.json({ error: 'invalid email or password' }, 401);
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET_KEY, {
-      expiresIn: "7d",
+      expiresIn: '7d',
     });
 
     return c.json({ token }, 201);
@@ -75,7 +73,13 @@ export default class AuthController {
 
   static async getMe(c: Context) {
     const userId: string = c.get('userId');
-    const user = await dbClient.users?.findOne({ _id: new ObjectId(userId) });
-    return c.json(user, 201);
+    const user = (await dbClient.users?.findOne({
+      _id: new ObjectId(userId),
+    })) as Partial<WithId<User>>;
+
+    delete user.password;
+    delete user._id;
+
+    return c.json({ id: userId, ...user }, 201);
   }
 }
