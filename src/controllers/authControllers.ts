@@ -43,31 +43,29 @@ export default class AuthController {
   }
 
   static async generateToken(c: Context) {
-     const payload = await c.req.json();
+    const payload = await c.req.json();
 
-     const parseResults = UserCredentialsSchema.safeParse(payload);
-     if (!parseResults.success) {
+    const parseResults = UserCredentialsSchema.safeParse(payload);
+    if (!parseResults.success) {
       console.log(parseResults.error);
       return c.json({ errors: parseResults.error.errors }, 400);
-     }
+    }
 
     const { email, password } = parseResults.data;
 
     const user = await dbClient.users?.findOne({ email });
     if (!user) {
-      // i know it's invalid email only, but this for security reasons
       return c.json({ error: 'invalid email or password' }, 401);
     }
 
-    const correctPass = bcrypt.compare(password, user.password);
+    const correctPass = await bcrypt.compare(password, user.password);
 
     if (!correctPass) {
-      // i know it's invalid password only, but this for security reasons
       return c.json({ error: 'invalid email or password' }, 401);
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET_KEY, {
-      expiresIn: "7d",
+      expiresIn: '7d',
     });
 
     return c.json({ token }, 201);
