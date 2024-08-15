@@ -193,6 +193,37 @@ class WorkspaceController {
     return c.json({ error: 'failed to update workspace' }, 500);
   }
 
+  static async changeOwner(c: Context) {
+    const workspaceId = c.get('workspaceId') as string;
+    const { newOwnerId } = await c.req.json();
+
+    if (
+      !newOwnerId ||
+      typeof newOwnerId !== 'string' ||
+      !isValidObjectId(newOwnerId)
+    ) {
+      return c.json({ error: 'newOwnerId is missing or invalid' }, 400);
+    }
+
+    const updateResults = await dbClient.workspaces?.updateOne(
+      {
+        _id: new ObjectId(workspaceId),
+        members: new ObjectId(newOwnerId as string),
+      },
+      {
+        $set: {
+          owner: new ObjectId(newOwnerId as string),
+        },
+      },
+    );
+
+    if (updateResults?.acknowledged && updateResults?.modifiedCount > 0) {
+      return c.json({ updated: updateResults?.modifiedCount || 0 }, 200);
+    }
+
+    return c.json({ error: 'failed to change workspace owner' }, 500);
+  }
+
   // members //
 
   static async getWorkspaceMembers(c: Context) {

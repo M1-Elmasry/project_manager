@@ -59,4 +59,11 @@ route.get(
   WorkspacesController.getWorkspaceProjects,
 );
 
+route.post(
+  '/:workspaceId/change_owner',
+  verifyToken,
+  WorkspaceGuard({ onlyOwner: true }),
+  WorkspacesController.changeOwner,
+);
+
 export default route;
