@@ -1,6 +1,7 @@
 import type { Context, Next } from 'hono';
 import dbClient from '../utils/db';
 import { ObjectId } from 'mongodb';
+import { isValidObjectId } from '../utils/helpers';
 
 export interface WorkspaceGuardOptions {
   onlyOwner?: boolean;
@@ -16,8 +17,8 @@ export interface WorkspaceGuardOptions {
  * If no workspace or the user is not a member, will respond with `404 Not Found`.
  * If the user is not permitted, will respond with `403 Forbidden`.
  *
- * If successful, will add `workspaceId`, `workspace` object
- * and `isWorkspaceOwner` to the context.
+ * If successful, will add `workspaceId`, `workspace` object, `isWorkspaceOwner`
+ * and `workspaceOwnerId` to the context.
  *
  * To only allow the owner member, set the `options.onlyOwner` to **true**.
  */
@@ -34,6 +35,10 @@ export function WorkspaceGuard(options: WorkspaceGuardOptions = {}) {
       throw new Error('please add workspaceId param to the route path');
     }
 
+    if (!isValidObjectId(workspaceId)) {
+      return c.json({ error: 'Invalid workspace ID' }, 400);
+    }
+
     const workspace = await dbClient.workspaces?.findOne({
       _id: new ObjectId(workspaceId),
     });
@@ -44,7 +49,7 @@ export function WorkspaceGuard(options: WorkspaceGuardOptions = {}) {
     }
 
     // validate if user is a member
-    if (!workspace.members.includes(new ObjectId(userId))) {
+    if (!workspace.members.find((oId) => oId.toString() === userId)) {
       return c.json({ error: 'Not Found' }, 404);
     }
 
@@ -54,7 +59,8 @@ export function WorkspaceGuard(options: WorkspaceGuardOptions = {}) {
     }
 
     c.set('workspaceId', workspaceId);
-    c.set('worskpace', workspace);
+    c.set('workspace', workspace);
+    c.set('workspaceOwnerId', workspace.owner.toString());
     c.set('isWorkspaceOwner', workspace.owner.toString() === userId);
 
     return next();
