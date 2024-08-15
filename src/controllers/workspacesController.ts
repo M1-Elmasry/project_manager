@@ -1,12 +1,69 @@
 import { Context } from 'hono';
-import { Workspace, WorkspacePayloadSchema } from '../types/workspaces';
+import {
+  Workspace,
+  WorkspacePayloadSchema,
+  WorkspaceUpdatePayloadSchema,
+} from '../types/workspaces';
 import dbClient from '../utils/db';
 import { ObjectId } from 'mongodb';
+import { isValidObjectId } from '../utils/helpers';
 
 class WorkspaceController {
   // CRUD //
 
-  static getAllJoinedWorkspaces(c: Context) {}
+  static async getAllJoinedWorkspaces(c: Context) {
+    const userId = c.get('userId') as string;
+
+    // !TODO: Update the projects section after implementing the projects feature
+    // !FIX: Project Section Unimplemented
+    const workspaces = await dbClient.workspaces
+      ?.aggregate([
+        { $match: { members: new ObjectId(userId) } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'owner',
+            foreignField: '_id',
+            as: 'owner',
+          },
+        },
+        { $unwind: '$owner' },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'members',
+            foreignField: '_id',
+            as: 'members',
+          },
+        },
+        {
+          $addFields: {
+            id: '$_id',
+            owner: { id: '$owner._id' },
+            isOwner: { $eq: ['$owner._id', new ObjectId(userId)] },
+            members: {
+              $map: {
+                input: '$members',
+                in: {
+                  $mergeObjects: [{ id: '$$this._id' }, '$$this'],
+                },
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            owner: { _id: 0, password: 0 },
+            members: { _id: 0, password: 0 },
+            projects: 0,
+          },
+        },
+      ])
+      .toArray();
+
+    return c.json(workspaces);
+  }
 
   static async getWorkspace(c: Context) {
     const userId = c.get('userId') as string;
@@ -16,7 +73,7 @@ class WorkspaceController {
 
     const owner = await dbClient.users?.findOne({ _id: new ObjectId(userId) });
 
-    return {
+    return c.json({
       id: workspaceId,
       name: workspace.name,
       description: workspace.description,
@@ -26,14 +83,21 @@ class WorkspaceController {
         username: owner?.username,
         email: owner?.email,
       },
-    };
+    });
   }
 
   static async createWorkspace(c: Context) {
     const userId = c.get('userId') as string;
-    const parseResults = WorkspacePayloadSchema.safeParse(c.req.json());
+    const parseResults = WorkspacePayloadSchema.safeParse(await c.req.json());
+
     if (!parseResults.success) {
-      return c.res.json();
+      return c.json(
+        {
+          error: 'invalid workspace payload',
+          validations: parseResults.error.errors,
+        },
+        400,
+      );
     }
 
     const { name, description } = parseResults.data;
@@ -60,37 +124,115 @@ class WorkspaceController {
     });
 
     if (results?.acknowledged) {
-      return c.json({}, 204);
+      return c.json({ deleted: 1 }, 204);
     }
 
     return c.json({ error: 'failed to delete a workspace' }, 500);
   }
 
-  static updateWorkspace(c: Context) {}
+  static async updateWorkspace(c: Context) {
+    const workspaceId = c.get('workspaceId') as string;
+    const parseResults = WorkspaceUpdatePayloadSchema.safeParse(
+      await c.req.json(),
+    );
+
+    if (!parseResults.success) {
+      return c.json(
+        {
+          error: 'invalid update workspace payload',
+          validations: parseResults.error.errors,
+        },
+        400,
+      );
+    }
+
+    const changes = parseResults.data as { [key: string]: any };
+
+    // if no changes do nothing
+    if (Object.keys(changes).length === 0) {
+      return c.json({ updated: 0 }, 200);
+    }
+
+    const updateResults = await dbClient.workspaces?.updateOne(
+      {
+        _id: new ObjectId(workspaceId),
+      },
+      {
+        $set: changes,
+      },
+    );
+
+    if (updateResults?.acknowledged) {
+      return c.json({ updated: updateResults?.modifiedCount }, 200);
+    }
+
+    return c.json({ error: 'failed to update workspace' }, 500);
+  }
 
   // members //
 
-  static getWorkspaceMembers(c: Context) {}
+  static async getWorkspaceMembers(c: Context) {
+    console.log('start');
+    const workspaceId = c.get('workspaceId') as string;
+    const members = await dbClient.workspaces
+      ?.aggregate([
+        {
+          $match: { _id: new ObjectId(workspaceId) },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'members',
+            foreignField: '_id',
+            as: 'members',
+          },
+        },
+        {
+          $unwind: '$members',
+        },
+        {
+          $replaceRoot: { newRoot: '$members' },
+        },
+        {
+          $addFields: {
+            id: '$_id',
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            password: 0,
+          },
+        },
+      ])
+      .toArray();
+
+    if (!members) {
+      return c.json({ error: 'failed to get workspace members' }, 500);
+    }
+
+    return c.json(members);
+  }
 
   static async addMembers(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
     const { members } = await c.req.json();
 
-    if (!members || Array.isArray(members) || members.length === 0) {
-      return c.json({ error: 'members is required' }, 400);
+    if (!members || !Array.isArray(members) || members.length === 0) {
+      return c.json({ error: 'members field is required' }, 400);
     }
+
+    const memberIds: ObjectId[] = members
+      .filter((mId: string) => isValidObjectId(mId))
+      .map((mId: string) => new ObjectId(mId));
 
     const results = await dbClient.workspaces?.updateOne(
       { _id: new ObjectId(workspaceId) },
-      {
-        $addToSet: {
-          members: { $each: members.map((mId: string) => new ObjectId(mId)) },
-        },
-      },
+      { $addToSet: { members: { $each: memberIds } } },
     );
 
-    if (results?.acknowledged && results.modifiedCount > 0) {
-      return c.json({ state: 'ok' }, 200);
+    if (results?.acknowledged) {
+      return c.json({ state: 'ok', added: results?.modifiedCount || 0 }, 200);
     }
 
     return c.json({ error: 'failed to add members' }, 500);
@@ -98,29 +240,28 @@ class WorkspaceController {
 
   static async deleteMembers(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
+    const workspaceOwnerId = c.get('workspaceOwnerId') as string;
     const { members } = await c.req.json();
 
-    if (!members || Array.isArray(members) || members.length === 0) {
-      return c.json({ error: 'members is required' }, 400);
+    console.log(typeof members, members);
+    if (!members || !Array.isArray(members) || members.length === 0) {
+      return c.json({ error: 'members field is required' }, 400);
     }
 
-    const memberIds: ObjectId[] = members.map(
-      (mId: string) => new ObjectId(mId),
-    );
+    const memberIds: ObjectId[] = members
+      .filter((mId: string) => isValidObjectId(mId) && mId !== workspaceOwnerId)
+      .map((mId: string) => new ObjectId(mId));
+
+    console.log('to delete:', memberIds);
 
     const results = await dbClient.workspaces?.updateOne(
       { _id: new ObjectId(workspaceId) },
-      {
-        $pull: {
-          members: {
-            $in: memberIds,
-          },
-        },
-      },
+      // @ts-ignore
+      { $pull: { members: { $in: memberIds } } },
     );
 
-    if (results?.acknowledged && results.modifiedCount > 0) {
-      return c.json({ state: 'ok' }, 200);
+    if (results?.acknowledged) {
+      return c.json({ state: 'ok', deleted: results?.modifiedCount || 0 }, 200);
     }
 
     return c.json({ error: 'failed to remove members' }, 500);
@@ -128,7 +269,10 @@ class WorkspaceController {
 
   // projects //
 
-  static getWorkspaceProjects(c: Context) {}
+  static getWorkspaceProjects(c: Context) {
+    // !FIX: Unimplemented
+    return c.json({ error: 'unimplemented' }, 500);
+  }
 }
 
 export default WorkspaceController;
