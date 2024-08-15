@@ -28,34 +28,34 @@ class WorkspaceController {
           },
         },
         { $unwind: '$owner' },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'members',
-            foreignField: '_id',
-            as: 'members',
-          },
-        },
+        // {
+        //   $lookup: {
+        //     from: 'users',
+        //     localField: 'members',
+        //     foreignField: '_id',
+        //     as: 'members',
+        //   },
+        // },
         {
           $addFields: {
             id: '$_id',
             owner: { id: '$owner._id' },
             isOwner: { $eq: ['$owner._id', new ObjectId(userId)] },
-            members: {
-              $map: {
-                input: '$members',
-                in: {
-                  $mergeObjects: [{ id: '$$this._id' }, '$$this'],
-                },
-              },
-            },
+            // members: {
+            //   $map: {
+            //     input: '$members',
+            //     in: {
+            //       $mergeObjects: [{ id: '$$this._id' }, '$$this'],
+            //     },
+            //   },
+            // },
           },
         },
         {
           $project: {
             _id: 0,
             owner: { _id: 0, password: 0 },
-            members: { _id: 0, password: 0 },
+            members: 0,
             projects: 0,
           },
         },
@@ -64,6 +64,30 @@ class WorkspaceController {
 
     return c.json(workspaces);
   }
+
+  // static async getWorkspaceMembers(c: Context) {
+  //   const userId = c.get('userId') as string;
+  //
+  //   dbClient.workspaces
+  //     ?.aggregate([
+  //       {
+  //         $match: { members: new ObjectId(userId) },
+  //       },
+  //       {
+  //         $addFields: {
+  //           id: '$_id',
+  //         },
+  //       },
+  //       {
+  //         $project: {
+  //           _id: 0,
+  //           members: 0,
+  //           projects: 0,
+  //         },
+  //       },
+  //     ])
+  //     .toArray();
+  // }
 
   static async getWorkspace(c: Context) {
     const userId = c.get('userId') as string;
@@ -172,7 +196,6 @@ class WorkspaceController {
   // members //
 
   static async getWorkspaceMembers(c: Context) {
-    console.log('start');
     const workspaceId = c.get('workspaceId') as string;
     const members = await dbClient.workspaces
       ?.aggregate([
