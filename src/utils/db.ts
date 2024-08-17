@@ -2,6 +2,7 @@ import { MongoClient } from 'mongodb';
 import { DB_HOST, DB_PORT, DB_NAME } from './constants';
 import type { Db, Collection } from 'mongodb';
 import type { UserDocument } from '../types/auth';
+import type { Workspace } from '../types/workspaces';
 
 class DBClient {
   readonly host: string;
@@ -11,6 +12,7 @@ class DBClient {
   public client: MongoClient | null = null;
   public db: Db | null = null;
   public users: Collection<UserDocument> | null = null;
+  public workspaces: Collection<Workspace> | null = null;
 
   constructor(host?: string, port?: string, databaseName?: string) {
     this.host = host || DB_HOST;
@@ -22,6 +24,7 @@ class DBClient {
         this.client = client;
         this.db = this.client.db(this.databaseName);
         this.users = this.db.collection('users');
+        this.workspaces = this.db.collection('workspaces');
         console.log(`db connected on ${this.host}:${this.port}`);
       })
       .catch((error) => {

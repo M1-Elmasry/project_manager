@@ -15,7 +15,13 @@ export default class AuthController {
     const parseResults = UserSchema.safeParse(payload);
     if (!parseResults.success) {
       console.log(parseResults.error);
-      return c.json({ errors: parseResults.error.errors }, 400);
+      return c.json(
+        {
+          error: 'invalid create user payload',
+          validations: parseResults.error.errors,
+        },
+        400,
+      );
     }
 
     const { email, password, username } = parseResults.data;
@@ -48,7 +54,13 @@ export default class AuthController {
     const parseResults = UserCredentialsSchema.safeParse(payload);
     if (!parseResults.success) {
       console.log(parseResults.error);
-      return c.json({ errors: parseResults.error.errors }, 400);
+      return c.json(
+        {
+          error: 'invalid login payload',
+          validations: parseResults.error.errors,
+        },
+        400,
+      );
     }
 
     const { email, password } = parseResults.data;
