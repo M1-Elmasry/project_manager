@@ -8,6 +8,9 @@ For our first release, we focused on implementing the following core features:
 
 - **Workspace:** A component that groups relevant projects together.
 - **Project:** A collection of tasks organized according to their states.
+- **Notes:** A feature within a project that allows members to document additional information or ideas relevant to the tasks.
+- **Questions:** A feature that enables project members to initiate and participate in discussions related to any aspect of the project.
+- **Replies:** Responses provided to questions, facilitating ongoing discussions within the project.
 - **Tasks:** A set of to-do lists representing the steps needed to complete a task.
 - **To-Do List:** A series of mini-tasks that serve as steps to complete a project task.
 
