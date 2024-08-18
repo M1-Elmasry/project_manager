@@ -2,10 +2,11 @@ import type { Context, Next } from 'hono';
 import dbClient from '../utils/db';
 import { ObjectId } from 'mongodb';
 import { isValidObjectId } from '../utils/helpers';
+import { GuardOptions } from './utils';
 
-export interface WorkspaceGuardOptions {
-  onlyOwner?: boolean;
-}
+// export interface WorkspaceGuardOptions {
+//  onlyOwner?: boolean;
+//}
 
 /**
  * A middleware that checks if the user is a workspace member.
@@ -22,7 +23,7 @@ export interface WorkspaceGuardOptions {
  *
  * To only allow the owner member, set the `options.onlyOwner` to **true**.
  */
-export function WorkspaceGuard(options: WorkspaceGuardOptions = {}) {
+export function WorkspaceGuard(options: GuardOptions = {}) {
   return async (c: Context, next: Next) => {
     const userId: string | undefined = c.get('userId');
 
