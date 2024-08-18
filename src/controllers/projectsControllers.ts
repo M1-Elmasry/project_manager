@@ -6,7 +6,7 @@ import {
 } from '../types/projects';
 import dbClient from '../utils/db';
 import { ObjectId, WithId } from 'mongodb';
-import { deleteProjectsWithRelatedEntities } from './utils';
+import { deleteProjectsWithRelatedEntities } from '../utils/helpers';
 import { Workspace } from '../types/workspaces';
 import { isValidObjectId } from '../utils/helpers';
 
