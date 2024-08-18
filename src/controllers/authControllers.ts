@@ -80,7 +80,7 @@ export default class AuthController {
       expiresIn: '7d',
     });
 
-    return c.json({ token }, 201);
+    return c.json({ token }, 200);
   }
 
   static async getMe(c: Context) {
@@ -92,6 +92,6 @@ export default class AuthController {
     delete user.password;
     delete user._id;
 
-    return c.json({ id: userId, ...user }, 201);
+    return c.json({ id: userId, ...user }, 200);
   }
 }
