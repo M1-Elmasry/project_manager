@@ -28,6 +28,12 @@ The backend is built using the following technologies:
 
 This project is currently under active development. We are continuously working on adding more features and improving the overall functionality.
 
+## Documentation
+
+Currently I used quick markdown files for documenting main features.
+
+- [Authentication](/docs/auth.md)
+
 ## Team Members
 
 - **Fadi Asaad (Davenchy):** Backend
