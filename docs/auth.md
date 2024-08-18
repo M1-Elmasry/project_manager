@@ -171,6 +171,6 @@ Response:
 {
   "id": "<MongoDB ID>",
   "username": "johndoe",
-  "email": "johndoe@me.com
+  "email": "johndoe@me.com"
 }
 ```
