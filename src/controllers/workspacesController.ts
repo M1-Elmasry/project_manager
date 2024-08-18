@@ -143,6 +143,7 @@ class WorkspaceController {
 
   static async deleteWorkspace(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
+    // !FIX: delete projects related to this workspace
     const results = await dbClient.workspaces?.deleteOne({
       _id: new ObjectId(workspaceId),
     });
