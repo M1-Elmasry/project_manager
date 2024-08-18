@@ -52,13 +52,6 @@ route.delete(
   WorkspacesController.deleteMembers,
 );
 
-route.get(
-  '/:workspaceId/projects',
-  verifyToken,
-  WorkspaceGuard(),
-  WorkspacesController.getWorkspaceProjects,
-);
-
 route.post(
   '/:workspaceId/change_owner',
   verifyToken,
