@@ -43,9 +43,9 @@ export default class NotesController {
 
   // !TODO: implemenet this fuckin shit below
 
-  //static async getAllNotes(c: Context) {
-  // get all notes associated wih a project
-  //}
+  static async getAllNotes(c: Context) {
+   return c.json({});
+  }
 
   static async updateNote(c: Context) {
     //const userId = c.get('userId') as string;
