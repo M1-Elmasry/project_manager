@@ -58,6 +58,7 @@ export default class QuestionsController {
         },
         { $unwind: '$questions' },
         { $replaceRoot: { newRoot: '$questions' } },
+        // !FIX: should get replies objects, not IDs
       ])
       .toArray();
 
