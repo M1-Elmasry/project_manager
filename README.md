@@ -2,6 +2,8 @@
 
 This repository contains the backend code for our ALX portfolio project, a project management tool designed to facilitate team collaboration. The project is part of a micro-repo structure, where the backend, frontend, and other components are developed separately to streamline the development process.
 
+The frontend repository: [TaskHive](https://github.com/Mahmoud-Samy-Creator/TaskHive-web-app-client)
+
 ## Minimum Viable Product (MVP) Features
 
 For our first release, we focused on implementing the following core features:
@@ -39,6 +41,6 @@ Currently I used quick markdown files for documenting main features.
 
 ## Team Members
 
-- **Fadi Asaad (Davenchy):** Backend
-- **Mostafa Elmasry (M1-Elmasry):** Backend
-- **Mahmoud Samy:** Frontend
+- **Fadi Asaad ([Davenchy](https://github.com/Davenchy)):** Backend
+- **Mostafa Elmasry ([M1-Elmasry](https://github.com/M1-Elmasry)):** Backend
+- **Mahmoud Samy ([Mahmoud-Samy-Creator](https://github.com/Mahmoud-Samy-Creator)):** Frontend
