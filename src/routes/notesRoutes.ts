@@ -35,6 +35,25 @@ app.put(
   NotesController.updateNote,
 );
 
+// set note as public by owner only
+app.put(
+  '/:noteId/set_public',
+  AuthGuard,
+  WorkspaceGuard(),
+  ProjectGuard(),
+  NoteGuard(),
+  NotesController.setPublic,
+);
+
+// unset note public flag by owner only
+app.put(
+  '/:noteId/unset_public',
+  AuthGuard,
+  WorkspaceGuard(),
+  ProjectGuard(),
+  NoteGuard(),
+  NotesController.unsetPublic,
+);
 
 // delete note by owner only
 app.delete(
