@@ -6,9 +6,8 @@ import {
 } from '../types/projects';
 import dbClient from '../utils/db';
 import { ObjectId, WithId } from 'mongodb';
-import { deleteProjectsWithRelatedEntities } from '../utils/helpers';
 import { Workspace } from '../types/workspaces';
-import { isValidObjectId } from '../utils/helpers';
+import { isValidObjectId, deleteProjectComponents } from '../utils/helpers';
 
 export default class ProjectsControllers {
   static async getAllJoinedProjects(c: Context) {
@@ -154,25 +153,37 @@ export default class ProjectsControllers {
   }
 
   static async deleteProject(c: Context) {
+    const projectId = c.get('projectId') as string;
     const project = c.get('project') as WithId<ProjectDocument>;
     const workspace = c.get('workspace') as WithId<Workspace>;
 
-    const upResult = await dbClient.workspaces?.updateOne(
+    try {
+      await deleteProjectComponents(project);
+    } catch (err) {
+      return c.json({ error: (err as Error).message }, 500);
+    }
+
+    const updateResult = await dbClient.workspaces?.updateOne(
       { _id: workspace._id },
       { $pull: { projects: project._id } },
     );
 
-    if (!upResult?.acknowledged) {
-      return c.json({ error: 'cannot remove project id from workspace' }, 500);
+    if (!updateResult?.acknowledged) {
+      return c.json({ error: 'failed to remove project from workspace' }, 500);
     }
 
-    await deleteProjectsWithRelatedEntities([project._id]);
+    const deleteResult = await dbClient.projects?.deleteOne({
+      _id: new ObjectId(projectId),
+    });
 
-    return c.json({ deleted: 'done' }, 204);
+    if (!deleteResult?.acknowledged) {
+      return c.json({ error: 'failed to remove a project' }, 500);
+    }
+
+    return c.json({ deleted: deleteResult?.deletedCount }, 200);
   }
 
   static async addMembers(c: Context) {
-    // !FIX: should validate if members exists in workspace or not
     const projectId = c.get('projectId') as string;
     const { members } = await c.req.json();
 
