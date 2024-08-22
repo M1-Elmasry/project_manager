@@ -6,7 +6,7 @@ import {
 } from '../types/workspaces';
 import dbClient from '../utils/db';
 import { ObjectId } from 'mongodb';
-import { isValidObjectId } from '../utils/helpers';
+import { isValidObjectId, deleteProjectComponents } from '../utils/helpers';
 
 class WorkspaceController {
   // CRUD //
@@ -14,8 +14,6 @@ class WorkspaceController {
   static async getAllJoinedWorkspaces(c: Context) {
     const userId = c.get('userId') as string;
 
-    // !TODO: Update the projects section after implementing the projects feature
-    // !FIX: Project Section Unimplemented
     const workspaces = await dbClient.workspaces
       ?.aggregate([
         { $match: { members: new ObjectId(userId) } },
@@ -28,27 +26,11 @@ class WorkspaceController {
           },
         },
         { $unwind: '$owner' },
-        // {
-        //   $lookup: {
-        //     from: 'users',
-        //     localField: 'members',
-        //     foreignField: '_id',
-        //     as: 'members',
-        //   },
-        // },
         {
           $addFields: {
             id: '$_id',
             owner: { id: '$owner._id' },
             isOwner: { $eq: ['$owner._id', new ObjectId(userId)] },
-            // members: {
-            //   $map: {
-            //     input: '$members',
-            //     in: {
-            //       $mergeObjects: [{ id: '$$this._id' }, '$$this'],
-            //     },
-            //   },
-            // },
           },
         },
         {
@@ -64,30 +46,6 @@ class WorkspaceController {
 
     return c.json(workspaces);
   }
-
-  // static async getWorkspaceMembers(c: Context) {
-  //   const userId = c.get('userId') as string;
-  //
-  //   dbClient.workspaces
-  //     ?.aggregate([
-  //       {
-  //         $match: { members: new ObjectId(userId) },
-  //       },
-  //       {
-  //         $addFields: {
-  //           id: '$_id',
-  //         },
-  //       },
-  //       {
-  //         $project: {
-  //           _id: 0,
-  //           members: 0,
-  //           projects: 0,
-  //         },
-  //       },
-  //     ])
-  //     .toArray();
-  // }
 
   static async getWorkspace(c: Context) {
     const userId = c.get('userId') as string;
@@ -143,16 +101,22 @@ class WorkspaceController {
 
   static async deleteWorkspace(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
-    // !FIX: delete projects related to this workspace
-    const results = await dbClient.workspaces?.deleteOne({
+
+    const result = await dbClient.workspaces?.findOneAndDelete({
       _id: new ObjectId(workspaceId),
     });
 
-    if (results?.acknowledged) {
-      return c.json({ deleted: 1 }, 204);
+    if (!result) {
+      return c.json({ error: 'failed to delete a workspace' }, 500);
     }
 
-    return c.json({ error: 'failed to delete a workspace' }, 500);
+    try {
+      await Promise.allSettled(result.projects.map(deleteProjectComponents));
+    } catch (err) {
+      return c.json({ error: (err as Error).message }, 500);
+    }
+
+    return c.json({ deleted: 1 }, 200);
   }
 
   static async updateWorkspace(c: Context) {
@@ -320,13 +284,6 @@ class WorkspaceController {
     }
 
     return c.json({ error: 'failed to remove members' }, 500);
-  }
-
-  // projects //
-
-  static getWorkspaceProjects(c: Context) {
-    // !FIX: Unimplemented
-    return c.json({ error: 'unimplemented' }, 500);
   }
 }
 
