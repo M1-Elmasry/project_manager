@@ -12,7 +12,7 @@ app.use(
   '/docs',
   swaggerUI({
     url: 'swagger.yaml',
-    spec: YAML.load('./src/swagger.yaml'),
+    spec: YAML.load('./swagger.yaml'),
   }),
 );
 

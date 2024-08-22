@@ -35,7 +35,7 @@ COPY --from=build /app/node_modules ./node_modules
 
 # Copy the built code from the build stage
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/src/swagger.yaml ./dist/swagger.yaml
+COPY --from=build /app/swagger.yaml ./
 
 # Expose the port your app runs on
 EXPOSE 5000
