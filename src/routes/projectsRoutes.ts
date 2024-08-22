@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { verifyToken } from '../middlewares/authMiddelwares';
+import { AuthGuard } from '../middlewares/authMiddelwares';
 import { WorkspaceGuard } from '../middlewares/workspacesMiddlewares';
 import ProjectsControllers from '../controllers/projectsControllers';
 import { ProjectGuard } from '../middlewares/projectsMiddlewares';
@@ -8,16 +8,16 @@ const app = new Hono();
 
 app.get(
   '/',
-  verifyToken,
+  AuthGuard,
   WorkspaceGuard(),
   ProjectsControllers.getAllJoinedProjects,
 );
 
-app.post('/', verifyToken, WorkspaceGuard(), ProjectsControllers.createProject);
+app.post('/', AuthGuard, WorkspaceGuard(), ProjectsControllers.createProject);
 
 app.get(
   '/:projectId',
-  verifyToken,
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard(),
   ProjectsControllers.getProject,
@@ -25,7 +25,7 @@ app.get(
 
 app.put(
   '/:projectId',
-  verifyToken,
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard({ onlyOwner: true }),
   ProjectsControllers.updateProject,
@@ -33,7 +33,7 @@ app.put(
 
 app.delete(
   '/:projectId',
-  verifyToken,
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard({ onlyOwner: true }),
   ProjectsControllers.deleteProject,
@@ -41,16 +41,15 @@ app.delete(
 
 app.get(
   '/:projectId/members',
-  verifyToken,
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard(),
   ProjectsControllers.getMembers,
 );
 
-
 app.post(
   '/:projectId/members',
-  verifyToken,
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard({ onlyOwner: true }),
   ProjectsControllers.addMembers,
@@ -58,7 +57,7 @@ app.post(
 
 app.delete(
   '/:projectId/members',
-  verifyToken,
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard({ onlyOwner: true }),
   ProjectsControllers.deleteMembers,

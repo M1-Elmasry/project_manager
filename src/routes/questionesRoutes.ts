@@ -1,42 +1,43 @@
-import { Hono } from "hono";
-import { WorkspaceGuard } from "../middlewares/workspacesMiddlewares";
-import { ProjectGuard } from "../middlewares/projectsMiddlewares";
-import QuestionsController from "../controllers/questionsControllers";
-import { verifyToken } from "../middlewares/authMiddelwares";
+import { Hono } from 'hono';
+import { WorkspaceGuard } from '../middlewares/workspacesMiddlewares';
+import { ProjectGuard } from '../middlewares/projectsMiddlewares';
+import QuestionsController from '../controllers/questionsControllers';
+import { AuthGuard } from '../middlewares/authMiddelwares';
+import { QuestionGuard } from '../middlewares/questionsMiddlewares';
 
 const app = new Hono();
 
 app.post(
-  '/questions',
-  verifyToken,
+  '/',
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard(),
   QuestionsController.createQuestion,
 );
 
 app.get(
-  '/questions',
-  verifyToken,
+  '/',
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard(),
   QuestionsController.getAllQuestion,
 );
 
-// !FIX: only author who can update the question, not project owner !
-
 app.put(
-  '/questions/:questionId',
-  verifyToken,
+  '/:questionId',
+  AuthGuard,
   WorkspaceGuard(),
-  ProjectGuard({ onlyOwner: true }),
+  ProjectGuard(),
+  QuestionGuard({ permissionMode: 'Author' }),
   QuestionsController.updateQuestion,
 );
 
 app.delete(
-  '/questions/:questionId',
-  verifyToken,
+  '/:questionId',
+  AuthGuard,
   WorkspaceGuard(),
-  ProjectGuard({ onlyOwner: true }),
+  ProjectGuard(),
+  QuestionGuard({ permissionMode: 'Owner&Author' }),
   QuestionsController.deleteQuestion,
 );
 

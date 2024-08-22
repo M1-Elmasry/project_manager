@@ -12,11 +12,14 @@ const app = new Hono();
 app.route('/auth', AuthRoute);
 app.route('/workspaces', WorkspacesRoute);
 app.route('workspaces/:workspaceId/projects', ProjectsRoute);
-app.route('workspaces/:workspaceId/projects/:projectId', QuestionsRoute);
-app.route('workspaces/:workspaceId/projects/:projectId', NotesRoute);
+app.route(
+  'workspaces/:workspaceId/projects/:projectId/questions',
+  QuestionsRoute,
+);
 app.route(
   'workspaces/:workspaceId/projects/:projectId/questions/:questionId/replies',
   RepliesRoute,
 );
+app.route('workspaces/:workspaceId/projects/:projectId/notes', NotesRoute);
 
 export default app;

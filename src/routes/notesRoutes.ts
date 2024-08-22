@@ -1,42 +1,48 @@
-import { Hono } from "hono";
-import { WorkspaceGuard } from "../middlewares/workspacesMiddlewares";
-import { ProjectGuard } from "../middlewares/projectsMiddlewares";
-import NotesController from "../controllers/notesControllers";
-import { verifyToken } from "../middlewares/authMiddelwares";
+import { Hono } from 'hono';
+import { WorkspaceGuard } from '../middlewares/workspacesMiddlewares';
+import { ProjectGuard } from '../middlewares/projectsMiddlewares';
+import NotesController from '../controllers/notesControllers';
+import { AuthGuard } from '../middlewares/authMiddelwares';
+import { NoteGuard } from '../middlewares/notesMiddlewares';
 
 const app = new Hono();
 
+// create note
 app.post(
-  '/notes',
-  verifyToken,
+  '/',
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard(),
   NotesController.createNote,
 );
 
+// get all owned and public notes
 app.get(
-  '/notes',
-  verifyToken,
+  '/',
+  AuthGuard,
   WorkspaceGuard(),
   ProjectGuard(),
   NotesController.getAllNotes,
 );
 
-// !FIX: only author he can update the note, not project owner !
-
+// update note by owner only
 app.put(
-  '/notes/:noteId',
-  verifyToken,
+  '/:noteId',
+  AuthGuard,
   WorkspaceGuard(),
-  ProjectGuard({ onlyOwner: true }),
+  ProjectGuard(),
+  NoteGuard(),
   NotesController.updateNote,
 );
 
+
+// delete note by owner only
 app.delete(
-  '/notes/:noteId',
-  verifyToken,
+  '/:noteId',
+  AuthGuard,
   WorkspaceGuard(),
-  ProjectGuard({ onlyOwner: true }),
+  ProjectGuard(),
+  NoteGuard(),
   NotesController.deleteNote,
 );
 
