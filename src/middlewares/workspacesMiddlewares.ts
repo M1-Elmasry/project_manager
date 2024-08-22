@@ -46,12 +46,12 @@ export function WorkspaceGuard(options: GuardOptions = {}) {
 
     // validate if workspace exists
     if (!workspace) {
-      return c.json({ error: 'Not Found' }, 404);
+      return c.json({ error: 'Workspace Not Found' }, 404);
     }
 
     // validate if user is a member
     if (!workspace.members.find((oId) => oId.toString() === userId)) {
-      return c.json({ error: 'Not Found' }, 404);
+      return c.json({ error: 'Workspace Not Found' }, 404);
     }
 
     // validate if user is an owner

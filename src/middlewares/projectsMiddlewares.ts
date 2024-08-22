@@ -27,12 +27,12 @@ export function ProjectGuard(options: GuardOptions = {}) {
 
     // validate if project exists
     if (!project) {
-      return c.json({ error: 'Not Found' }, 404);
+      return c.json({ error: 'Project Not Found' }, 404);
     }
 
     // validate if user is a member
     if (!project.members.find((oId) => oId.toString() === userId)) {
-      return c.json({ error: 'Not Found' }, 404);
+      return c.json({ error: 'Project Not Found' }, 404);
     }
 
     // validate if user is an owner
