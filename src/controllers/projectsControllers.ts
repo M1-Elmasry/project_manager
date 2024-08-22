@@ -12,36 +12,38 @@ import { isValidObjectId, deleteProjectComponents } from '../utils/helpers';
 export default class ProjectsControllers {
   static async getAllJoinedProjects(c: Context) {
     const userId = c.get('userId') as string;
-    const projects  = await dbClient.workspaces?.aggregate([
-      { $match: { members: new ObjectId(userId) } },
-      {
-        $lookup: {
-          from: 'projects',
-          localField: 'projects',
-          foreignField: '_id',
-          as: 'project',
+    const projects = (await dbClient.workspaces
+      ?.aggregate([
+        { $match: { members: new ObjectId(userId) } },
+        {
+          $lookup: {
+            from: 'projects',
+            localField: 'projects',
+            foreignField: '_id',
+            as: 'project',
+          },
         },
-      },
-      {
-        $unwind: '$project',
-      },
-      {
-        $project: {
-          _id: '$project._id',
-          name: '$project.name',
-          description: '$project.description',
-          deadline: '$project.deadline',
-          owner: '$project.owner',
-          all_states: '$project.all_states',
-          all_labels: '$project.all_labels',
-          members: '$project.members',
-          tasks: '$project.tasks',
-          notes: '$project.notes',
-          questions: '$project.questions',
-          created_at: '$project.created_at',
+        {
+          $unwind: '$project',
         },
-      },
-    ]).toArray() as WithId<ProjectDocument>[];
+        {
+          $project: {
+            _id: '$project._id',
+            name: '$project.name',
+            description: '$project.description',
+            deadline: '$project.deadline',
+            owner: '$project.owner',
+            all_states: '$project.all_states',
+            all_labels: '$project.all_labels',
+            members: '$project.members',
+            tasks: '$project.tasks',
+            notes: '$project.notes',
+            questions: '$project.questions',
+            created_at: '$project.created_at',
+          },
+        },
+      ])
+      .toArray()) as WithId<ProjectDocument>[];
 
     return c.json(projects, 200);
   }
@@ -101,16 +103,19 @@ export default class ProjectsControllers {
     const project = c.get('project') as WithId<ProjectDocument>;
     const owner = await dbClient.users?.findOne({ _id: new ObjectId(userId) });
     const isOwner = c.get('isProjectOwner');
-    return c.json({
-      ...project,
-      isOwner,
-      // override owner property in project to be owner obj instead of id
-      owner: {
-        id: owner?._id,
-        username: owner?.username,
-        email: owner?.email,
+    return c.json(
+      {
+        ...project,
+        isOwner,
+        // override owner property in project to be owner obj instead of id
+        owner: {
+          id: owner?._id,
+          username: owner?.username,
+          email: owner?.email,
+        },
       },
-    }, 200);
+      200,
+    );
   }
 
   static async updateProject(c: Context) {
