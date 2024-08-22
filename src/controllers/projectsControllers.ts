@@ -21,6 +21,21 @@ export default class ProjectsControllers {
             localField: 'projects',
             foreignField: '_id',
             as: 'project',
+            pipeline: [
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: 'owner',
+                  foreignField: '_id',
+                  as: 'owner',
+                  pipeline: [
+                    { $set: { id: '$_id' } },
+                    { $unset: ['_id', 'password'] },
+                  ],
+                },
+              },
+              { $unwind: '$owner' },
+            ],
           },
         },
         {
@@ -28,17 +43,14 @@ export default class ProjectsControllers {
         },
         {
           $project: {
-            _id: '$project._id',
+            _id: 0,
+            id: '$project._id',
             name: '$project.name',
             description: '$project.description',
             deadline: '$project.deadline',
             owner: '$project.owner',
             all_states: '$project.all_states',
             all_labels: '$project.all_labels',
-            members: '$project.members',
-            tasks: '$project.tasks',
-            notes: '$project.notes',
-            questions: '$project.questions',
             created_at: '$project.created_at',
           },
         },
