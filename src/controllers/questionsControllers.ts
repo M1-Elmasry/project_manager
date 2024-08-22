@@ -1,10 +1,7 @@
 import { Context } from 'hono';
-import {
-  QuestionPayloadSchema,
-  QuestionUpdatePayloadSchema,
-} from '../types/projects';
+import { QuestionDocument, QuestionPayloadSchema } from '../types/projects';
 import dbClient from '../utils/db';
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithId } from 'mongodb';
 
 export default class QuestionsController {
   static async createQuestion(c: Context) {
@@ -44,6 +41,7 @@ export default class QuestionsController {
   }
 
   static async getAllQuestion(c: Context) {
+    const userId = c.get('userId') as string;
     const projectId = c.get('projectId') as string;
     const questions = await dbClient.projects
       ?.aggregate([
@@ -58,19 +56,60 @@ export default class QuestionsController {
         },
         { $unwind: '$questions' },
         { $replaceRoot: { newRoot: '$questions' } },
-        // !FIX: should get replies objects, not IDs
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'author',
+            foreignField: '_id',
+            as: 'author',
+          },
+        },
+        { $unwind: '$author' },
+        {
+          $addFields: {
+            id: '$_id',
+            author: { id: '$author._id' },
+            isAuthor: { $eq: ['$author._id', new ObjectId(userId)] },
+          },
+        },
+        { $unset: ['_id', 'author._id', 'author.password'] },
+        {
+          $lookup: {
+            from: 'replies',
+            localField: 'replies',
+            foreignField: '_id',
+            as: 'replies',
+            pipeline: [
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: 'author',
+                  foreignField: '_id',
+                  as: 'author',
+                },
+              },
+              { $unwind: '$author' },
+              {
+                $set: {
+                  id: '$_id',
+                  isAuthor: { $eq: [new ObjectId(userId), '$author._id'] },
+                  author: { id: '$author._id' },
+                },
+              },
+              { $unset: ['_id', 'author._id', 'author.password'] },
+            ],
+          },
+        },
       ])
       .toArray();
 
-    return c.json({ questions }, 201);
+    return c.json(questions, 201);
   }
 
   static async updateQuestion(c: Context) {
-    //const userId = c.get('userId') as string;
     const questionId = c.get('questionId') as string;
-    // !FIX: only owner of the question can update
     const payload = await c.req.json();
-    const parseResults = QuestionUpdatePayloadSchema.safeParse(payload);
+    const parseResults = QuestionPayloadSchema.safeParse(payload);
 
     if (!parseResults.success) {
       return c.json(
@@ -82,15 +121,9 @@ export default class QuestionsController {
       );
     }
 
-    const newQuestion = parseResults.data as string;
-
-    //if (Object.keys(changes).length === 0) {
-    //  return c.json({ updated: 0 }, 200);
-    //}
-
     const updateResults = await dbClient.questions?.updateOne(
       { _id: new ObjectId(questionId) },
-      { $set: { question: newQuestion } },
+      { $set: parseResults.data },
     );
 
     if (updateResults?.acknowledged) {
@@ -101,20 +134,15 @@ export default class QuestionsController {
   }
 
   static async deleteQuestion(c: Context) {
-    const questionId = c.req.param('questionId') as string;
+    const questionId = c.get('questionId') as string;
     const projectId = c.get('projectId') as string;
+    const question = c.get('question') as WithId<QuestionDocument>;
 
-    // !FIX: only owner of the question can delete
-    const question = await dbClient.questions?.findOne({
-      _id: new ObjectId(questionId),
-    });
-    if (!question) {
-      return c.json({ error: 'invalid quesiton id' }, 401);
-    }
-
+    // delete all question's replies
     const deleteReplies = await dbClient.replies?.deleteMany({
-      _id: { $in: question?.replies },
+      _id: { $in: question?.replies ?? [] },
     });
+
     if (!deleteReplies?.acknowledged) {
       return c.json({ error: "cannot delete question's replies" }, 500);
     }
@@ -130,6 +158,12 @@ export default class QuestionsController {
       { _id: new ObjectId(projectId) },
       { $pull: { questions: new ObjectId(questionId) } },
     );
-    return c.json({ deleted: deleteQuestion.deletedCount }, 200);
+    return c.json(
+      {
+        deletedQuestions: deleteQuestion.deletedCount,
+        deletedReplies: deleteReplies.deletedCount,
+      },
+      200,
+    );
   }
 }
