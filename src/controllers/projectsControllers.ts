@@ -52,6 +52,7 @@ export default class ProjectsControllers {
             all_states: '$project.all_states',
             all_labels: '$project.all_labels',
             created_at: '$project.created_at',
+            isOwner: { $eq: [new ObjectId(userId), '$project.owner.id'] },
           },
         },
       ])
@@ -112,11 +113,20 @@ export default class ProjectsControllers {
 
   static async getProject(c: Context) {
     const userId = c.get('userId') as string;
-    const project = c.get('project') as WithId<ProjectDocument>;
+    const projectId = c.get('projectId') as string;
+    const project = c.get('project') as Partial<WithId<ProjectDocument>>;
     const owner = await dbClient.users?.findOne({ _id: new ObjectId(userId) });
     const isOwner = c.get('isProjectOwner');
+
+    delete project._id;
+    delete project.members;
+    delete project.tasks;
+    delete project.notes;
+    delete project.questions;
+
     return c.json(
       {
+        id: projectId,
         ...project,
         isOwner,
         // override owner property in project to be owner obj instead of id
