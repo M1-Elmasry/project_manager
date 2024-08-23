@@ -226,12 +226,23 @@ paths:
       security:
         - bearerAuth: []
       requestBody:
-        description: Workspace creation payload
-        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WorkspacePayload'
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                description:
+                  type: string
+              required:
+                - name
+                - description
+            example:
+              name: "My Workspace"
+              description: "This is a workspace for project management."
+
       responses:
         201:
           description: Workspace created successfully.
@@ -325,12 +336,21 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Workspace update payload
-        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WorkspaceUpdatePayload'
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  description: "Optional name of the workspace."
+                description:
+                  type: string
+                  description: "Optional description of the workspace."
+            example:
+              name: "Updated Workspace Name"
+              description: "Updated description for the workspace."
         responses:
         200:
           description: Workspace updated successfully.
@@ -473,8 +493,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Members to add to the workspace
-        required: true
         content:
           application/json:
             schema:
@@ -484,6 +502,14 @@ paths:
                   type: array
                   items:
                     type: string
+                  description: "Array of member IDs to add to the workspace."
+              required:
+                - members
+            example:
+              members:
+                - "64c1a1e1b2c4f72a9b6c2d5a"
+                - "64c1a1e1b2c4f72a9b6c2d5b"
+
       responses:
         200:
           description: Members added successfully.
@@ -537,8 +563,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Members to remove from the workspace
-        required: true
         content:
           application/json:
             schema:
@@ -548,6 +572,13 @@ paths:
                   type: array
                   items:
                     type: string
+                  description: "Array of member IDs to remove from the workspace."
+              required:
+                - members
+            example:
+              members:
+                - "64c1a1e1b2c4f72a9b6c2d5d"
+                - "64c1a1e1b2c4f72a9b6c2d5e"
       responses:
         200:
           description: Members deleted successfully.
@@ -602,8 +633,6 @@ paths:
           schema:
             type: string
       requestBody:
-        description: New owner ID
-        required: true
         content:
           application/json:
             schema:
@@ -611,7 +640,11 @@ paths:
               properties:
                 newOwnerId:
                   type: string
-                  description: ID of the new owner
+                  description: "The ID of the new owner."
+              required:
+                - newOwnerId
+            example:
+              newOwnerId: "64c1a1e1b2c4f72a9b6c2d5c"
       responses:
         200:
           description: Workspace owner changed successfully.
