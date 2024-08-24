@@ -1,44 +1,33 @@
-# Use the official Node.js 18 slim image as the base image
-# Stage 1: Build Stage
-FROM node:18-slim AS build
+FROM node:20-alpine AS base
 
-# Set the working directory inside the container
+# Stage1: The Builder
+FROM base AS builder
+
+RUN apk add --no-cache gcompat
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files
-COPY package*.json .
+COPY package*.json tsconfig.json src ./
 
-# Install production dependencies
-RUN npm install
+RUN npm ci && npm run build && npm prune --production
 
-# Copy the source code
-COPY . .
-
-# Build the TypeScript code
-RUN npm run build
-
-# Remove development dependencies
-RUN npm prune --omit=dev
-
-# Stage 2: Production Stage
-FROM node:18-slim
+# Stage2: The Runner
+FROM base AS runner
 
 LABEL maintainer="Davenchy <firon1222@gmail.com>"
 LABEL description="Project Manager Backend"
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files
-COPY --from=build /app/package*.json ./
-COPY --from=build /app/node_modules ./node_modules
+RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 hono
+RUN apk add --no-cache curl
 
-# Copy the built code from the build stage
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/swagger.yaml ./
+COPY --from=builder --chown=hono:nodejs /app/node_modules /app/node_modules
+COPY --from=builder --chown=hono:nodejs /app/dist /app/dist
+COPY --from=builder --chown=hono:nodejs /app/package.json /app/package.json
+COPY --chown=hono:nodejs ./swagger.yaml /app/swagger.yaml
 
-# Expose the port your app runs on
+USER hono
+ENV  SERVER_HOST=0.0.0.0
 EXPOSE 5000
 
-# Start the server
 CMD ["npm", "start"]
