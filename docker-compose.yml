@@ -1,0 +1,26 @@
+volumes:
+  mongodb: {}
+
+networks:
+  project_manager: {}
+
+services:
+  backend:
+    image: davenchy/project-manager:beta
+    container_name: project_manager_backend
+    networks:
+      - project_manager
+    ports:
+      - "5000:5000"
+    environment:
+      - "SERVER_HOST=0.0.0.0"
+      - "DB_HOST=project_manager_database"
+  database:
+    image: mongodb/mongodb-community-server:latest
+    container_name: project_manager_database
+    networks:
+      - project_manager
+    expose:
+      - 27017
+    volumes:
+      - "mongodb:/data/db"
