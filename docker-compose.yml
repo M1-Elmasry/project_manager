@@ -20,9 +20,7 @@ services:
     container_name: project_manager_database
     networks:
       - project_manager
-    ports:
-      - "27017:27017"
-    # expose:
-    #   - 27017
+    expose:
+      - 27017
     volumes:
       - "mongodb:/data/db"
