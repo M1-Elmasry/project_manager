@@ -8,6 +8,9 @@ services:
   backend:
     image: davenchy/project-manager:beta
     container_name: project_manager_backend
+    restart: unless-stopped
+    depends_on:
+      - database
     networks:
       - project_manager
     ports:
@@ -18,6 +21,7 @@ services:
   database:
     image: mongodb/mongodb-community-server:latest
     container_name: project_manager_database
+    restart: unless-stopped
     networks:
       - project_manager
     expose:
