@@ -6,7 +6,11 @@ import {
 } from '../types/workspaces';
 import dbClient from '../utils/db';
 import { ObjectId } from 'mongodb';
-import { isValidObjectId, deleteProjectComponents } from '../utils/helpers';
+import {
+  isValidObjectId,
+  deleteProjectComponents,
+  deleteWorkspace,
+} from '../utils/helpers';
 
 class WorkspaceController {
   // CRUD //
@@ -102,18 +106,10 @@ class WorkspaceController {
   static async deleteWorkspace(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
 
-    const result = await dbClient.workspaces?.findOneAndDelete({
-      _id: new ObjectId(workspaceId),
-    });
+    const isDeleted = await deleteWorkspace(new ObjectId(workspaceId));
 
-    if (!result) {
+    if (!isDeleted) {
       return c.json({ error: 'failed to delete a workspace' }, 500);
-    }
-
-    try {
-      await Promise.allSettled(result.projects.map(deleteProjectComponents));
-    } catch (err) {
-      return c.json({ error: (err as Error).message }, 500);
     }
 
     return c.json({ deleted: 1 }, 200);
