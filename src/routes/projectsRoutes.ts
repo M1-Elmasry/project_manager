@@ -47,16 +47,16 @@ app.get(
   ProjectsControllers.getMembers,
 );
 
-app.post(
-  '/:projectId/members',
+app.put(
+  '/:projectId/add_members',
   AuthGuard,
   WorkspaceGuard(),
   ProjectGuard({ onlyOwner: true }),
   ProjectsControllers.addMembers,
 );
 
-app.delete(
-  '/:projectId/members',
+app.put(
+  '/:projectId/remove_members',
   AuthGuard,
   WorkspaceGuard(),
   ProjectGuard({ onlyOwner: true }),
