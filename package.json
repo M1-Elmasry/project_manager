@@ -24,7 +24,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node .",
-    "dev": "nodemon src/server.ts",
+    "dev": "nodemon --watch swagger.yaml src/server.ts",
     "build": "tsc --build",
     "typing": "npx tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -37,21 +37,25 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.2.0",
+    "@types/swagger-ui": "^3.52.4",
+    "@types/yamljs": "^0.2.34",
     "eslint": "^9.9.0",
     "globals": "^15.9.0",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.4",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.17.0",
     "typescript": "^5.5.4",
-    "typescript-eslint": "^8.0.1"
+    "typescript-eslint": "^8.0.1",
+    "ts-node": "^10.9.2"
   },
   "dependencies": {
     "@hono/node-server": "^1.12.0",
+    "@hono/swagger-ui": "^0.4.0",
     "bcrypt": "^5.1.1",
     "hono": "^4.5.5",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.8.0",
+    "swagger-ui": "^5.17.14",
+    "yamljs": "^0.3.0",
     "zod": "^3.23.8"
   }
 }

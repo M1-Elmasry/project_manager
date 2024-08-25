@@ -1,0 +1,191 @@
+openapi: 3.0.0
+info:
+  title: Project Manager API
+  version: 1.0.0
+  description: API for managing projects, including authentication.
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+tags:
+  - name: Authentication
+    description: Endpoints related to user authentication
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "newuser"
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "securePassword123"
+              required:
+                - username
+                - email
+                - password
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    example: "64dfaf7b6f7a6b1f6b7f7a6b"
+        '400':
+          description: Invalid input or email already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid create user payload"
+                  validations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                          example: "email"
+                        message:
+                          type: string
+                          example: "Invalid email format"
+        '500':
+          description: Failed to create user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "failed to create user"
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login and generate a JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "securePassword123"
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '400':
+          description: Invalid login payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid login payload"
+                  validations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                          example: "password"
+                        message:
+                          type: string
+                          example: "Password must be at least 8 characters"
+        '401':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid email or password"
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get the current authenticated user's information
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved user information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: "64dfaf7b6f7a6b1f6b7f7a6b"
+                  username:
+                    type: string
+                    example: "newuser"
+                  email:
+                    type: string
+                    format: email
+                    example: "user@example.com"
+        '401':
+          description: Invalid authorization or user not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "invalid authorization"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
