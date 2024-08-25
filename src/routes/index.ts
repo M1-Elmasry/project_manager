@@ -6,6 +6,7 @@ import ProjectsRoute from './projectsRoutes';
 import QuestionsRoute from './questionesRoutes';
 import RepliesRoute from './repliesRoutes';
 import NotesRoute from './notesRoutes';
+import TasksRoute from './tasksRoute';
 
 const app = new Hono();
 
@@ -21,5 +22,6 @@ app.route(
   RepliesRoute,
 );
 app.route('workspaces/:workspaceId/projects/:projectId/notes', NotesRoute);
+app.route('workspaces/:workspaceId/projects/:projectId/tasks', TasksRoute);
 
 export default app;
