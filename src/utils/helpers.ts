@@ -1,6 +1,5 @@
-import { ObjectId, WithId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
-import { ProjectDocument } from '../types/projects';
 
 /**
  * Safely validates if an object id is valid or not without throwing an error
@@ -13,86 +12,104 @@ export const isValidObjectId = (id: string): boolean => {
   }
 };
 
-export async function deleteProjectComponents(projectId: string): Promise<void>;
-export async function deleteProjectComponents(
-  projectId: ObjectId,
-): Promise<void>;
-export async function deleteProjectComponents(
-  project: WithId<ProjectDocument>,
-): Promise<void>;
+/**
+ * Deletes a workspace, their projects and any component under it
+ */
+export async function deleteWorkspace(workspaceId: ObjectId): Promise<boolean> {
+  const workspace = await dbClient.workspaces?.findOneAndDelete({
+    _id: workspaceId,
+  });
 
-export async function deleteProjectComponents(
-  arg: WithId<ProjectDocument> | ObjectId | string,
-) {
-  let projectId: ObjectId | undefined;
-  let project: WithId<ProjectDocument> | undefined;
-
-  if (typeof arg === 'string') {
-    if (!isValidObjectId(arg)) {
-      throw new Error('invalid project id');
-    }
-    projectId = new ObjectId(arg);
-  } else if (arg instanceof ObjectId) {
-    projectId = arg;
-  } else if (typeof arg === 'object' && arg._id !== undefined) {
-    project = arg;
+  if (!workspace) {
+    return false;
   }
 
-  if (!project && projectId) {
-    const result = await dbClient.projects?.findOne({ _id: projectId });
-    if (!result) {
-      throw new Error('no project found');
-    }
-    project = result;
-  }
+  // delete all projects and components under this workspace
+  await Promise.allSettled(workspace.projects.map(deleteProject));
+
+  return true;
+}
+
+export async function deleteProject(projectId: ObjectId) {
+  // delete project
+  const project = await dbClient.projects?.findOneAndDelete({
+    _id: projectId,
+  });
 
   if (!project) {
-    throw new Error('no project found');
+    return false;
   }
 
-  projectId = project._id;
+  // delete notes
+  await dbClient.notes?.deleteMany({ _id: { $in: project.notes } });
 
-  const notesResult = await dbClient.notes?.deleteMany({
-    _id: { $in: project.notes },
+  // delete questions and their replies
+  await Promise.allSettled(project.questions.map(deleteQuestion));
+
+  // delete tasks, checklists and checklist items
+  await Promise.allSettled(project.tasks.map(deleteTask));
+
+  return true;
+}
+
+export async function deleteQuestion(questionId: ObjectId) {
+  const question = await dbClient.questions?.findOneAndDelete({
+    _id: questionId,
   });
-  if (!notesResult?.acknowledged) {
-    throw new Error('error deleting project notes');
+
+  if (!question) {
+    return false;
   }
 
-  const replieResults = await dbClient.projects
-    ?.aggregate([
-      { $match: { _id: projectId } },
-      {
-        $lookup: {
-          from: 'questions',
-          localField: 'questions',
-          foreignField: '_id',
-          as: 'questions',
-        },
-      },
-      { $unwind: '$questions' },
-      { $replaceRoot: { newRoot: '$questions' } },
-      { $unwind: '$replies' },
-      { $group: { _id: null, replies: { $push: '$replies' } } },
-    ])
-    .toArray();
-
-  if (replieResults && replieResults.length > 0) {
-    const repliesResults = await dbClient.replies?.deleteMany({
-      _id: { $in: replieResults[0].replies },
-    });
-    if (!repliesResults?.acknowledged) {
-      throw new Error(
-        'error deleting questions replies releated to the project',
-      );
-    }
-  }
-  const questionsResult = await dbClient.questions?.deleteMany({
-    _id: { $in: project.questions },
+  // delete replies
+  const replyResult = await dbClient.replies?.deleteMany({
+    _id: { $in: question.replies },
   });
-  if (!questionsResult?.acknowledged) {
-    throw new Error('error deleting project questions');
+
+  if (replyResult?.acknowledged) {
+    return true;
   }
 
-  // !TODO: delete tasks and todo-lists after implementation
+  return false;
+}
+
+/**
+ * Deletes a task and checklists with their components under it.
+ */
+export async function deleteTask(taskId: ObjectId): Promise<boolean> {
+  const task = await dbClient.tasks?.findOneAndDelete({
+    _id: new ObjectId(taskId),
+  });
+
+  if (!task) {
+    return false;
+  }
+
+  return (await Promise.allSettled(task.checklists.map(deleteChecklist))).every(
+    (p) => p.status === 'fulfilled',
+  );
+}
+
+/**
+ * Deletes a checklist and components under it.
+ */
+export async function deleteChecklist(checklistId: ObjectId): Promise<boolean> {
+  // delete checklist
+  const checklist = await dbClient.checklists?.findOneAndDelete({
+    _id: checklistId,
+  });
+  if (!checklist) {
+    return false;
+  }
+
+  // delete checklist items
+  const deleteResult = await dbClient.checklistItems?.deleteMany({
+    _id: { $in: checklist.items },
+  });
+
+  if (deleteResult?.acknowledged) {
+    return true;
+  }
+
+  return false;
 }
