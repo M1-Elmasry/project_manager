@@ -7,6 +7,11 @@ import type { ProjectDocument } from '../types/projects';
 import type { NoteDocument } from '../types/projects';
 import type { QuestionDocument } from '../types/projects';
 import type { ReplyDocument } from '../types/projects';
+import {
+  ChecklistDocument,
+  ChecklistItemDocument,
+  TaskDocument,
+} from '../types/tasks';
 
 class DBClient {
   readonly host: string;
@@ -21,6 +26,9 @@ class DBClient {
   public notes: Collection<NoteDocument> | null = null;
   public questions: Collection<QuestionDocument> | null = null;
   public replies: Collection<ReplyDocument> | null = null;
+  public tasks: Collection<TaskDocument> | null = null;
+  public checklists: Collection<ChecklistDocument> | null = null;
+  public checklistItems: Collection<ChecklistItemDocument> | null = null;
 
   constructor(host?: string, port?: string, databaseName?: string) {
     this.host = host || DB_HOST;
@@ -37,6 +45,9 @@ class DBClient {
         this.notes = this.db.collection('notes');
         this.questions = this.db.collection('questions');
         this.replies = this.db.collection('replies');
+        this.tasks = this.db.collection('tasks');
+        this.checklists = this.db.collection('checklists');
+        this.checklistItems = this.db.collection('checklistItems');
         console.log(`db connected on ${this.host}:${this.port}`);
       })
       .catch((error) => {
