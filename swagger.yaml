@@ -9,7 +9,8 @@ servers:
 tags:
   - name: Authentication
     description: Endpoints related to user authentication
-
+  - name: Workspaces
+    description: Endpooints related for workspaces operations
 paths:
   /auth/register:
     post:
@@ -182,6 +183,504 @@ paths:
                   error:
                     type: string
                     example: "invalid authorization"
+  /workspaces:
+    get:
+      tags:
+        - Workspaces
+      summary: Get all workspaces where the user is a member
+      operationId: getAllJoinedWorkspaces
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A list of workspaces the user has joined.
+          content:
+            application/json:
+              example:
+                - id: "60f6a08b22b22b003cd9ed8e"
+                  name: "Workspace 1"
+                  description: "A description of workspace 1"
+                  owner:
+                    id: "60f6a08b22b22b003cd9ed8f"
+                    username: "owner_username"
+                    email: "owner@example.com"
+                  isOwner: true
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        500:
+          description: Internal Server Error - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Internal Server Error"
+    post:
+      tags:
+        - Workspaces
+      summary: Create a new workspace
+      operationId: createWorkspace
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                description:
+                  type: string
+              required:
+                - name
+                - description
+            example:
+              name: "My Workspace"
+              description: "This is a workspace for project management."
+
+      responses:
+        201:
+          description: Workspace created successfully.
+          content:
+            application/json:
+              example:
+                workspaceId: "60f6a08b22b22b003cd9ed8e"
+        400:
+          description: Invalid workspace payload - The request body contains invalid or missing data.
+          content:
+            application/json:
+              example:
+                message: "Invalid workspace payload"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        500:
+          description: Failed to create a workspace - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to create a workspace"
+
+  /workspaces/{workspaceId}:
+    get:
+      tags:
+        - Workspaces
+      summary: Get a workspace by ID
+      operationId: getWorkspace
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Details of the requested workspace.
+          content:
+            application/json:
+              example:
+                id: "60f6a08b22b22b003cd9ed8e"
+                name: "Workspace 1"
+                description: "A description of workspace 1"
+                isOwner: true
+                owner:
+                  id: "60f6a08b22b22b003cd9ed8f"
+                  username: "owner_username"
+                  email: "owner@example.com"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to access this workspace.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Workspace Not Found - The workspace with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Workspace Not Found"
+        500:
+          description: Internal Server Error - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Internal Server Error"
+
+    put:
+      tags:
+        - Workspaces
+      summary: Update a workspace by ID
+      operationId: updateWorkspace
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  description: "Optional name of the workspace."
+                description:
+                  type: string
+                  description: "Optional description of the workspace."
+            example:
+              name: "Updated Workspace Name"
+              description: "Updated description for the workspace."
+        responses:
+        200:
+          description: Workspace updated successfully.
+          content:
+            application/json:
+              example:
+                updated: 1
+        400:
+          description: Invalid update workspace payload - The request body contains invalid or missing data.
+          content:
+            application/json:
+              example:
+                message: "Invalid update workspace payload"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to update this workspace.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Workspace Not Found - The workspace with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Workspace Not Found"
+        500:
+          description: Failed to update workspace - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to update workspace"
+
+    delete:
+      tags:
+        - Workspaces
+      summary: Delete a workspace by ID
+      operationId: deleteWorkspace
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Workspace deleted successfully.
+          content:
+            application/json:
+              example:
+                deleted: 1
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to delete this workspace.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Workspace Not Found - The workspace with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Workspace Not Found"
+        500:
+          description: Failed to delete a workspace - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to delete a workspace"
+
+  /workspaces/{workspaceId}/members:
+    get:
+      tags:
+        - Workspaces
+      summary: Get members of a workspace
+      operationId: getWorkspaceMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: A list of members in the workspace.
+          content:
+            application/json:
+              example:
+                - id: "60f6a08b22b22b003cd9ed8f"
+                  username: "member1"
+                  email: "member1@example.com"
+                - id: "60f6a08b22b22b003cd9ed90"
+                  username: "member2"
+                  email: "member2@example.com"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        404:
+          description: Workspace Not Found - The workspace with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Workspace Not Found"
+        500:
+          description: Failed to get workspace members - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to get workspace members"
+
+    post:
+      tags:
+        - Workspaces
+      summary: Add members to a workspace
+      operationId: addMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                members:
+                  type: array
+                  items:
+                    type: string
+                  description: "Array of member IDs to add to the workspace."
+              required:
+                - members
+            example:
+              members:
+                - "64c1a1e1b2c4f72a9b6c2d5a"
+                - "64c1a1e1b2c4f72a9b6c2d5b"
+
+      responses:
+        200:
+          description: Members added successfully.
+          content:
+            application/json:
+              example:
+                state: "ok"
+                added: 2
+        400:
+          description: Members field is required - The request body is missing the members field.
+          content:
+            application/json:
+              example:
+                message: "Members field is required"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to add members to this workspace.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Workspace Not Found - The workspace with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Workspace Not Found"
+        500:
+          description: Failed to add members - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to add members"
+
+    delete:
+      tags:
+        - Workspaces
+      summary: Remove members from a workspace
+      operationId: deleteMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                members:
+                  type: array
+                  items:
+                    type: string
+                  description: "Array of member IDs to remove from the workspace."
+              required:
+                - members
+            example:
+              members:
+                - "64c1a1e1b2c4f72a9b6c2d5d"
+                - "64c1a1e1b2c4f72a9b6c2d5e"
+      responses:
+        200:
+          description: Members deleted successfully.
+          content:
+            application/json:
+              example:
+                state: "ok"
+                deleted: 1
+        400:
+          description: Members field is required - The request body is missing the members field.
+          content:
+            application/json:
+              example:
+                message: "Members field is required"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to remove members from this workspace.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Workspace Not Found - The workspace with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Workspace Not Found"
+        500:
+          description: Failed to remove members - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to remove members"
+
+  /workspaces/{workspaceId}/change_owner:
+    post:
+      tags:
+        - Workspaces
+      summary: Change owner of a workspace
+      operationId: changeOwner
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newOwnerId:
+                  type: string
+                  description: "The ID of the new owner."
+              required:
+                - newOwnerId
+            example:
+              newOwnerId: "64c1a1e1b2c4f72a9b6c2d5c"
+      responses:
+        200:
+          description: Workspace owner changed successfully.
+          content:
+            application/json:
+              example:
+                updated: 1
+        400:
+          description: newOwnerId is missing or invalid - The request body contains an invalid or missing newOwnerId field.
+          content:
+            application/json:
+              example:
+                message: "newOwnerId is missing or invalid"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to change the owner of this workspace.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Workspace Not Found - The workspace with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Workspace Not Found"
+        500:
+          description: Failed to change workspace owner - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to change workspace owner"
 
 components:
   securitySchemes:
