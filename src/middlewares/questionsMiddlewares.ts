@@ -1,7 +1,7 @@
 import { Context, Next } from 'hono';
-import { isValidObjectId } from '../utils/helpers';
 import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
+import { guardUsageValidator } from './utils';
 
 export type QuestionGuardOption = {
   permissionMode: 'Author' | 'Owner&Author' | 'Anyone';
@@ -11,26 +11,11 @@ export function QuestionGuard(
   options: QuestionGuardOption = { permissionMode: 'Anyone' },
 ) {
   return async (c: Context, next: Next) => {
-    const userId: string | undefined = c.get('userId');
-    const projectId: string | undefined = c.get('projectId');
-    const workspaceId: string | undefined = c.get('workspaceId');
-    const questionId: string = c.req.param('questionId');
+    const userId: string = c.get('userId');
     const isProjectOwner: boolean = c.get('isProjectOwner') || false;
+    const questionId = guardUsageValidator('questionId', c);
 
-    if (!userId) {
-      throw new Error('Must be used after verifyToken middleware');
-    }
-    if (!projectId) {
-      throw new Error('Must be used after ProjectGuard middleware');
-    }
-    if (!workspaceId) {
-      throw new Error('Must be used after WorkspaceGuard middleware');
-    }
     if (!questionId) {
-      throw new Error('please add questionId param to the route path');
-    }
-
-    if (!isValidObjectId(questionId)) {
       return c.json({ error: 'Invalid question ID' }, 400);
     }
 

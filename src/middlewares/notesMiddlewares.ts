@@ -1,29 +1,14 @@
 import { Context, Next } from 'hono';
-import { isValidObjectId } from '../utils/helpers';
 import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
+import { guardUsageValidator } from './utils';
 
 export function NoteGuard() {
   return async (c: Context, next: Next) => {
-    const userId: string | undefined = c.get('userId');
-    const projectId: string | undefined = c.get('projectId');
-    const workspaceId: string | undefined = c.get('workspaceId');
-    const noteId: string = c.req.param('noteId');
+    const userId = c.get('userId') as string;
+    const noteId = guardUsageValidator('noteId', c);
 
-    if (!userId) {
-      throw new Error('Must be used after verifyToken middleware');
-    }
-    if (!projectId) {
-      throw new Error('Must be used after ProjectGuard middleware');
-    }
-    if (!workspaceId) {
-      throw new Error('Must be used after WorkspaceGuard middleware');
-    }
     if (!noteId) {
-      throw new Error('please add noteId param to the route path');
-    }
-
-    if (!isValidObjectId(noteId)) {
       return c.json({ error: 'Invalid note ID' }, 400);
     }
 
