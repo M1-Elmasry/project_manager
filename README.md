@@ -1,8 +1,23 @@
+Here's the updated README file with the new usage and documentation sections:
+
+---
+
 # Project Manager Backend
 
 This repository contains the backend code for our ALX portfolio project, a project management tool designed to facilitate team collaboration. The project is part of a micro-repo structure, where the backend, frontend, and other components are developed separately to streamline the development process.
 
 The frontend repository: [TaskHive](https://github.com/Mahmoud-Samy-Creator/TaskHive-web-app-client)
+
+## Table of Contents
+- [Minimum Viable Product (MVP) Features](#minimum-viable-product-mvp-features)
+- [Real-Time Event System](#real-time-event-system)
+- [Technologies Used](#technologies-used)
+- [Project Status](#project-status)
+- [Installation and Setup](#installation-and-setup)
+- [Usage](#usage)
+- [API Documentation](#api-documentation)
+- [Team Members](#team-members)
+- [License](#license)
 
 ## Minimum Viable Product (MVP) Features
 
@@ -33,14 +48,59 @@ The backend is built using the following technologies:
 
 This project is currently under active development. We are continuously working on adding more features and improving the overall functionality.
 
-## Documentation
+## Installation and Setup
 
-Currently I used quick markdown files for documenting main features.
+To get the backend running locally, follow these steps:
 
-- [Authentication](/docs/auth.md)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Davenchy/project-manager-backend.git
+   cd project-manager-backend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up environment variables (e.g., `.env` file).
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Usage
+
+For ease of setup and deployment, we have published a Docker image containing the latest release of the backend:
+
+```bash
+docker pull davenchy/project-manager:beta
+```
+
+Additionally, we've included a `docker-compose.yml` file to simplify the setup and running of the backend server and the required MongoDB database. To start the services, simply run:
+
+```bash
+docker-compose up
+```
+
+This will start the backend server and the database in a single step, making it easy to get everything up and running quickly.
+
+## API Documentation
+
+We used Swagger for API documentation. The `swagger.yaml` file in the repository contains the complete documentation for the backend. 
+
+For a rendered version of the Swagger documentation, visit:
+
+```http
+GET /docs
+```
+
+This endpoint serves the documentation in a user-friendly format.
 
 ## Team Members
 
 - **Fadi Asaad ([Davenchy](https://github.com/Davenchy)):** Backend
 - **Mostafa Elmasry ([M1-Elmasry](https://github.com/M1-Elmasry)):** Backend
 - **Mahmoud Samy ([Mahmoud-Samy-Creator](https://github.com/Mahmoud-Samy-Creator)):** Frontend
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
