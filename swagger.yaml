@@ -11,6 +11,8 @@ tags:
     description: Endpoints related to user authentication
   - name: Workspaces
     description: Endpooints related for workspaces operations
+  - name: Projects
+    description: Endpoints related fro projects operations
 paths:
   /auth/register:
     post:
@@ -81,7 +83,6 @@ paths:
                   error:
                     type: string
                     example: "failed to create user"
-
   /auth/login:
     post:
       tags:
@@ -147,7 +148,6 @@ paths:
                   error:
                     type: string
                     example: "invalid email or password"
-
   /auth/me:
     get:
       tags:
@@ -241,7 +241,6 @@ paths:
             example:
               name: "My Workspace"
               description: "This is a workspace for project management."
-
       responses:
         201:
           description: Workspace created successfully.
@@ -267,7 +266,6 @@ paths:
             application/json:
               example:
                 message: "Failed to create a workspace"
-
   /workspaces/{workspaceId}:
     get:
       tags:
@@ -320,7 +318,6 @@ paths:
             application/json:
               example:
                 message: "Internal Server Error"
-
     put:
       tags:
         - Workspaces
@@ -387,7 +384,6 @@ paths:
             application/json:
               example:
                 message: "Failed to update workspace"
-
     delete:
       tags:
         - Workspaces
@@ -432,7 +428,6 @@ paths:
             application/json:
               example:
                 message: "Failed to delete a workspace"
-
   /workspaces/{workspaceId}/members:
     get:
       tags:
@@ -477,7 +472,6 @@ paths:
             application/json:
               example:
                 message: "Failed to get workspace members"
-
     post:
       tags:
         - Workspaces
@@ -508,7 +502,6 @@ paths:
               members:
                 - "64c1a1e1b2c4f72a9b6c2d5a"
                 - "64c1a1e1b2c4f72a9b6c2d5b"
-
       responses:
         200:
           description: Members added successfully.
@@ -547,7 +540,6 @@ paths:
             application/json:
               example:
                 message: "Failed to add members"
-
     delete:
       tags:
         - Workspaces
@@ -585,7 +577,7 @@ paths:
             application/json:
               example:
                 state: "ok"
-                deleted: 1
+                deleted: 2
         400:
           description: Members field is required - The request body is missing the members field.
           content:
@@ -616,7 +608,6 @@ paths:
             application/json:
               example:
                 message: "Failed to remove members"
-
   /workspaces/{workspaceId}/change_owner:
     post:
       tags:
@@ -681,7 +672,459 @@ paths:
             application/json:
               example:
                 message: "Failed to change workspace owner"
-
+  /workspaces/{workspaceId}/projects:
+    get:
+      tags:
+        - Projects
+      summary: Get all joined projects
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of joined projects
+          content:
+            application/json:
+              example:
+                - id: "64df4372bc8c6521f5f1b557"
+                  name: "Project A"
+                  description: "Description of Project A"
+                  deadline: "2024-09-01"
+                  owner:
+                    id: "64df42e7bc8c6521f5f1b556"
+                    username: "owner_user"
+                    email: "owner@example.com"
+                  all_states: []
+                  all_labels: []
+                  created_at: "2024-08-15T12:34:56Z"
+                  isOwner: true
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        404:
+          description: Project Not Found - The project with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Project Not Found"
+    post:
+      tags:
+        - Projects
+      summary: Create a new project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                deadline:
+                  type: string
+                  format: date
+            example:
+              name: "New Project"
+              description: "A description of the new project"
+              deadline: "2024-09-01"
+      responses:
+        '201':
+          description: Project created successfully
+          content:
+            application/json:
+              example:
+                projectId: "64df4372bc8c6521f5f1b557"
+        400:
+          description: Invalid project payload - The request body contains invalid or missing data.
+          content:
+            application/json:
+              example:
+                message: "Invalid project payload"
+        500:
+          description: Failed to create a project - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to create a project"
+  /workspaces/{workspaceId}/projects/{projectId}:
+    get:
+      tags:
+        - Projects
+      summary: Get a specific project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project details retrieved successfully
+          content:
+            application/json:
+              example:
+                id: "64df4372bc8c6521f5f1b557"
+                name: "Project A"
+                description: "Description of Project A"
+                deadline: "2024-09-01"
+                owner:
+                  id: "64df42e7bc8c6521f5f1b556"
+                  username: "owner_user"
+                  email: "owner@example.com"
+                all_states: []
+                all_labels: []
+                created_at: "2024-08-15T12:34:56Z"
+                isOwner: true
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not a project member.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Project Not Found - The project with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Project Not Found"
+    put:
+      tags:
+        - Projects
+      summary: Update a project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                description:
+                  type: string
+                deadline:
+                  type: string
+                  format: date
+            example:
+              name: "Updated Project Name"
+              description: "Updated description"
+              deadline: "2024-10-01"
+      responses:
+        '200':
+          description: Project updated successfully
+          content:
+            application/json:
+              example:
+                updated: 1
+        400:
+          description: Invalid update project payload - The request body contains invalid or missing data.
+          content:
+            application/json:
+              example:
+                message: "Invalid update project payload"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to update this project.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Project Not Found - The project with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Project Not Found"
+        '500':
+          description: Failed to update project
+    delete:
+      tags:
+        - Projects
+      summary: Delete a project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Project deleted successfully
+          content:
+            application/json:
+              example:
+                deleted: 1
+        403:
+          description: Forbidden - The user is not allowed to delete this project.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Project Not Found - The project with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Project Not Found"
+        '500':
+          description: Failed to delete project
+  /workspaces/{workspaceId}/projects/{projectId}/members:
+    get:
+      tags:
+        - Projects
+      summary: Get project members
+      operationId: getMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+      responses:
+        200:
+          description: A list of members in the workspace.
+          content:
+            application/json:
+              example:
+                - id: "60f6a08b22b22b003cd9ed8f"
+                  username: "member1"
+                  email: "member1@example.com"
+                - id: "60f6a08b22b22b003cd9ed90"
+                  username: "member2"
+                  email: "member2@example.com"
+        '400':
+          description: Invalid project ID
+          content:
+            application/json:
+              example:
+                message: "Invalid update project payload"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        404:
+          description: Project Not Found - The project with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Project Not Found"
+  /workspaces/{workspaceId}/projects/{projectId}/add_members:
+    put:
+      tags:
+        - Projects
+      summary: Add members to a project
+      operationId: addMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                members:
+                  type: array
+                  items:
+                    type: string
+                  description: "Array of member IDs to add in the project."
+              required:
+                - members
+            example:
+              members:
+                - "64c1a1e1b2c4f72a9b6c2d5d"
+                - "64c1a1e1b2c4f72a9b6c2d5e"
+      responses:
+        200:
+          description: Members added successfully.
+          content:
+            application/json:
+              example:
+                state: "ok"
+                added: 2
+        400:
+          description: Members field is required - The request body is missing the members field.
+          content:
+            application/json:
+              example:
+                message: "Members field is required"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to add members to this project.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Project Not Found - The project with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Project Not Found"
+        500:
+          description: Failed to add members - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to add members"
+  /workspaces/{workspaceId}/projects/{projectId}/remove_members:
+    put:
+      tags:
+        - Projects
+      summary: Remove members from a project
+      operationId: deleteMembers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                members:
+                  type: array
+                  items:
+                    type: string
+                  description: "Array of member IDs to remove from the project."
+              required:
+                - members
+            example:
+              members:
+                - "64c1a1e1b2c4f72a9b6c2d5d"
+                - "64c1a1e1b2c4f72a9b6c2d5e"
+      responses:
+        200:
+          description: Members deleted successfully.
+          content:
+            application/json:
+              example:
+                state: "ok"
+                deleted: 2
+        400:
+          description: Members field is required - The request body is missing the members field.
+          content:
+            application/json:
+              example:
+                message: "Members field is required"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                message: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to remove members from this project.
+          content:
+            application/json:
+              example:
+                message: "Forbidden"
+        404:
+          description: Project Not Found - The project with the given ID does not exist.
+          content:
+            application/json:
+              example:
+                message: "Project Not Found"
+        500:
+          description: Failed to remove members - An error occurred on the server.
+          content:
+            application/json:
+              example:
+                message: "Failed to remove members"
 components:
   securitySchemes:
     bearerAuth:
