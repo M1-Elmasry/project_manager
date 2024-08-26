@@ -11,10 +11,12 @@ import { deleteProject, isValidObjectId } from '../utils/helpers';
 
 export default class ProjectsControllers {
   static async getAllJoinedProjects(c: Context) {
+    const workspaceId = c.get('workspaceId') as string;
     const userId = c.get('userId') as string;
-    const projects = (await dbClient.workspaces
+
+    const projects = await dbClient.workspaces
       ?.aggregate([
-        { $match: { members: new ObjectId(userId) } },
+        { $match: { _id: new ObjectId(workspaceId) } },
         {
           $lookup: {
             from: 'projects',
@@ -38,25 +40,18 @@ export default class ProjectsControllers {
             ],
           },
         },
+        { $unwind: '$project' },
+        { $replaceRoot: { newRoot: '$project' } },
+        { $match: { members: new ObjectId(userId) } },
         {
-          $unwind: '$project',
-        },
-        {
-          $project: {
-            _id: 0,
-            id: '$project._id',
-            name: '$project.name',
-            description: '$project.description',
-            deadline: '$project.deadline',
-            owner: '$project.owner',
-            all_states: '$project.all_states',
-            all_labels: '$project.all_labels',
-            created_at: '$project.created_at',
-            isOwner: { $eq: [new ObjectId(userId), '$project.owner.id'] },
+          $set: {
+            id: '$_id',
+            isOwner: { $eq: [new ObjectId(userId), '$owner.id'] },
           },
         },
+        { $unset: ['members', 'tasks', 'notes', 'questions', '_id'] },
       ])
-      .toArray()) as WithId<ProjectDocument>[];
+      .toArray();
 
     return c.json(projects, 200);
   }
@@ -227,6 +222,8 @@ export default class ProjectsControllers {
 
   static async getMembers(c: Context) {
     const projectId = c.get('projectId') as string;
+    const projectOwnerId = c.get('projectOwnerId') as string;
+
     const members = await dbClient.projects
       ?.aggregate([
         {
@@ -249,6 +246,7 @@ export default class ProjectsControllers {
         {
           $addFields: {
             id: '$_id',
+            isOwner: { $eq: ['$_id', new ObjectId(projectOwnerId)] },
           },
         },
         {

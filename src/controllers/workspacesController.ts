@@ -1,16 +1,13 @@
 import { Context } from 'hono';
 import {
   Workspace,
+  WorkspaceAddMemberSchema,
   WorkspacePayloadSchema,
   WorkspaceUpdatePayloadSchema,
 } from '../types/workspaces';
 import dbClient from '../utils/db';
 import { ObjectId } from 'mongodb';
-import {
-  isValidObjectId,
-  deleteProjectComponents,
-  deleteWorkspace,
-} from '../utils/helpers';
+import { isValidObjectId, deleteWorkspace } from '../utils/helpers';
 
 class WorkspaceController {
   // CRUD //
@@ -189,6 +186,10 @@ class WorkspaceController {
 
   static async getWorkspaceMembers(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
+    const workspaceOwnerId = c.get('workspaceOwnerId') as string;
+
+    console.log(workspaceId, workspaceOwnerId);
+
     const members = await dbClient.workspaces
       ?.aggregate([
         {
@@ -209,16 +210,12 @@ class WorkspaceController {
           $replaceRoot: { newRoot: '$members' },
         },
         {
-          $addFields: {
+          $set: {
             id: '$_id',
+            isOwner: { $eq: ['$_id', new ObjectId(workspaceOwnerId)] },
           },
         },
-        {
-          $project: {
-            _id: 0,
-            password: 0,
-          },
-        },
+        { $unset: ['_id', 'password'] },
       ])
       .toArray();
 
@@ -229,28 +226,39 @@ class WorkspaceController {
     return c.json(members);
   }
 
-  static async addMembers(c: Context) {
+  static async addMember(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
-    const { members } = await c.req.json();
+    const payload = await c.req.json();
+    const payloadValidationResult = WorkspaceAddMemberSchema.safeParse(payload);
 
-    if (!members || !Array.isArray(members) || members.length === 0) {
-      return c.json({ error: 'members field is required' }, 400);
+    if (!payloadValidationResult.success) {
+      return c.json(
+        {
+          error: 'invalid workspace add member payload',
+          validations: payloadValidationResult.error.errors,
+        },
+        400,
+      );
     }
 
-    const memberIds: ObjectId[] = members
-      .filter((mId: string) => isValidObjectId(mId))
-      .map((mId: string) => new ObjectId(mId));
+    const user = await dbClient.users?.findOne({
+      email: payloadValidationResult.data.email,
+    });
+
+    if (!user) {
+      return c.json({ error: 'no user found with the same email' }, 404);
+    }
 
     const results = await dbClient.workspaces?.updateOne(
       { _id: new ObjectId(workspaceId) },
-      { $addToSet: { members: { $each: memberIds } } },
+      { $addToSet: { members: user._id } },
     );
 
     if (results?.acknowledged) {
-      return c.json({ state: 'ok', added: results?.modifiedCount || 0 }, 200);
+      return c.json({ added: results?.modifiedCount || 0 });
     }
 
-    return c.json({ error: 'failed to add members' }, 500);
+    return c.json({ error: 'failed to add member to workspace' }, 500);
   }
 
   static async deleteMembers(c: Context) {
@@ -267,8 +275,6 @@ class WorkspaceController {
       .filter((mId: string) => isValidObjectId(mId) && mId !== workspaceOwnerId)
       .map((mId: string) => new ObjectId(mId));
 
-    console.log('to delete:', memberIds);
-
     const results = await dbClient.workspaces?.updateOne(
       { _id: new ObjectId(workspaceId) },
       // @ts-ignore
@@ -276,7 +282,7 @@ class WorkspaceController {
     );
 
     if (results?.acknowledged) {
-      return c.json({ state: 'ok', deleted: results?.modifiedCount || 0 }, 200);
+      return c.json({ deleted: results?.modifiedCount || 0 }, 200);
     }
 
     return c.json({ error: 'failed to remove members' }, 500);

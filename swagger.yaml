@@ -70,7 +70,7 @@ paths:
                         path:
                           type: string
                           example: "email"
-                        message:
+                        error:
                           type: string
                           example: "Invalid email format"
         '500':
@@ -135,7 +135,7 @@ paths:
                         path:
                           type: string
                           example: "password"
-                        message:
+                        error:
                           type: string
                           example: "Password must be at least 8 characters"
         '401':
@@ -210,13 +210,13 @@ paths:
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         500:
           description: Internal Server Error - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Internal Server Error"
+                error: "Internal Server Error"
     post:
       tags:
         - Workspaces
@@ -253,19 +253,19 @@ paths:
           content:
             application/json:
               example:
-                message: "Invalid workspace payload"
+                error: "Invalid workspace payload"
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         500:
           description: Failed to create a workspace - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to create a workspace"
+                error: "Failed to create a workspace"
   /workspaces/{workspaceId}:
     get:
       tags:
@@ -299,25 +299,25 @@ paths:
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not allowed to access this workspace.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Workspace Not Found - The workspace with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Workspace Not Found"
+                error: "Workspace Not Found"
         500:
           description: Internal Server Error - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Internal Server Error"
+                error: "Internal Server Error"
     put:
       tags:
         - Workspaces
@@ -359,31 +359,31 @@ paths:
           content:
             application/json:
               example:
-                message: "Invalid update workspace payload"
+                error: "Invalid update workspace payload"
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not allowed to update this workspace.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Workspace Not Found - The workspace with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Workspace Not Found"
+                error: "Workspace Not Found"
         500:
           description: Failed to update workspace - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to update workspace"
+                error: "Failed to update workspace"
     delete:
       tags:
         - Workspaces
@@ -409,25 +409,25 @@ paths:
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not allowed to delete this workspace.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Workspace Not Found - The workspace with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Workspace Not Found"
+                error: "Workspace Not Found"
         500:
           description: Failed to delete a workspace - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to delete a workspace"
+                error: "Failed to delete a workspace"
   /workspaces/{workspaceId}/members:
     get:
       tags:
@@ -451,28 +451,31 @@ paths:
                 - id: "60f6a08b22b22b003cd9ed8f"
                   username: "member1"
                   email: "member1@example.com"
+                  isOwner: true
                 - id: "60f6a08b22b22b003cd9ed90"
                   username: "member2"
                   email: "member2@example.com"
+                  isOwner: false
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         404:
           description: Workspace Not Found - The workspace with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Workspace Not Found"
+                error: "Workspace Not Found"
         500:
           description: Failed to get workspace members - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to get workspace members"
-    post:
+                error: "Failed to get workspace members"
+  /workspaces/{workspaceId}/add_member:
+    put:
       tags:
         - Workspaces
       summary: Add members to a workspace
@@ -491,56 +494,63 @@ paths:
             schema:
               type: object
               properties:
-                members:
-                  type: array
-                  items:
-                    type: string
-                  description: "Array of member IDs to add to the workspace."
+                email:
+                  type: string
+                  description: "The member's email address."
               required:
-                - members
+                - email
             example:
-              members:
-                - "64c1a1e1b2c4f72a9b6c2d5a"
-                - "64c1a1e1b2c4f72a9b6c2d5b"
+              email: "member@example.com"
       responses:
         200:
           description: Members added successfully.
           content:
             application/json:
               example:
-                state: "ok"
-                added: 2
+                added: 1
         400:
           description: Members field is required - The request body is missing the members field.
           content:
             application/json:
               example:
-                message: "Members field is required"
+                error: "invalid workspace add member payload"
+                validations:
+                  - "{...}"
+                  - "{...}"
+                  - "..."
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not allowed to add members to this workspace.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Workspace Not Found - The workspace with the given ID does not exist.
           content:
             application/json:
-              example:
-                message: "Workspace Not Found"
+              examples:
+                user_not_found:
+                  summary: If you are trying to add a non-existing user
+                  value:
+                    error: "no user found with the same email"
+                workspace_not_found:
+                  summary: If not workspace found with the given ID
+                  value:
+                    error: "Workspace Not Found"
         500:
           description: Failed to add members - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to add members"
-    delete:
+                error: "failed to add member to workspace"
+  /workspaces/{workspaceId}/remove_members:
+    put:
       tags:
         - Workspaces
       summary: Remove members from a workspace
@@ -576,40 +586,39 @@ paths:
           content:
             application/json:
               example:
-                state: "ok"
                 deleted: 2
         400:
-          description: Members field is required - The request body is missing the members field.
+          description: If the payload is invalid or missing the valid members field.
           content:
             application/json:
               example:
-                message: "Members field is required"
+                error: "Members field is required"
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not allowed to remove members from this workspace.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Workspace Not Found - The workspace with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Workspace Not Found"
+                error: "Workspace Not Found"
         500:
           description: Failed to remove members - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to remove members"
+                error: "Failed to remove members"
   /workspaces/{workspaceId}/change_owner:
-    post:
+    put:
       tags:
         - Workspaces
       summary: Change owner of a workspace
@@ -647,31 +656,31 @@ paths:
           content:
             application/json:
               example:
-                message: "newOwnerId is missing or invalid"
+                error: "newOwnerId is missing or invalid"
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not allowed to change the owner of this workspace.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Workspace Not Found - The workspace with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Workspace Not Found"
+                error: "Workspace Not Found"
         500:
           description: Failed to change workspace owner - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to change workspace owner"
+                error: "Failed to change workspace owner"
   /workspaces/{workspaceId}/projects:
     get:
       tags:
@@ -708,13 +717,13 @@ paths:
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         404:
           description: Project Not Found - The project with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Project Not Found"
+                error: "Project Not Found"
     post:
       tags:
         - Projects
@@ -757,13 +766,13 @@ paths:
           content:
             application/json:
               example:
-                message: "Invalid project payload"
+                error: "Invalid project payload"
         500:
           description: Failed to create a project - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to create a project"
+                error: "Failed to create a project"
   /workspaces/{workspaceId}/projects/{projectId}:
     get:
       tags:
@@ -805,19 +814,19 @@ paths:
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not a project member.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Project Not Found - The project with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Project Not Found"
+                error: "Project Not Found"
     put:
       tags:
         - Projects
@@ -866,25 +875,25 @@ paths:
           content:
             application/json:
               example:
-                message: "Invalid update project payload"
+                error: "Invalid update project payload"
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not allowed to update this project.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Project Not Found - The project with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Project Not Found"
+                error: "Project Not Found"
         '500':
           description: Failed to update project
     delete:
@@ -916,13 +925,13 @@ paths:
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Project Not Found - The project with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Project Not Found"
+                error: "Project Not Found"
         '500':
           description: Failed to delete project
   /workspaces/{workspaceId}/projects/{projectId}/members:
@@ -954,27 +963,29 @@ paths:
                 - id: "60f6a08b22b22b003cd9ed8f"
                   username: "member1"
                   email: "member1@example.com"
+                  isOwner: true
                 - id: "60f6a08b22b22b003cd9ed90"
                   username: "member2"
                   email: "member2@example.com"
+                  isOwner: false
         '400':
           description: Invalid project ID
           content:
             application/json:
               example:
-                message: "Invalid update project payload"
+                error: "Invalid update project payload"
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         404:
           description: Project Not Found - The project with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Project Not Found"
+                error: "Project Not Found"
   /workspaces/{workspaceId}/projects/{projectId}/add_members:
     put:
       tags:
@@ -1025,31 +1036,31 @@ paths:
           content:
             application/json:
               example:
-                message: "Members field is required"
+                error: "Members field is required"
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not allowed to add members to this project.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Project Not Found - The project with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Project Not Found"
+                error: "Project Not Found"
         500:
           description: Failed to add members - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to add members"
+                error: "Failed to add members"
   /workspaces/{workspaceId}/projects/{projectId}/remove_members:
     put:
       tags:
@@ -1100,31 +1111,31 @@ paths:
           content:
             application/json:
               example:
-                message: "Members field is required"
+                error: "Members field is required"
         401:
           description: Unauthorized - The user is not authenticated.
           content:
             application/json:
               example:
-                message: "Unauthorized"
+                error: "Unauthorized"
         403:
           description: Forbidden - The user is not allowed to remove members from this project.
           content:
             application/json:
               example:
-                message: "Forbidden"
+                error: "Forbidden"
         404:
           description: Project Not Found - The project with the given ID does not exist.
           content:
             application/json:
               example:
-                message: "Project Not Found"
+                error: "Project Not Found"
         500:
           description: Failed to remove members - An error occurred on the server.
           content:
             application/json:
               example:
-                message: "Failed to remove members"
+                error: "Failed to remove members"
 components:
   securitySchemes:
     bearerAuth:
