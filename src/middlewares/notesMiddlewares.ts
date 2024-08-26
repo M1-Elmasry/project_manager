@@ -22,7 +22,7 @@ export function NoteGuard() {
     }
 
     // validate permissions
-    const isAuthor = note.author.toString() !== userId;
+    const isAuthor = note.author.toString() === userId;
     if (!isAuthor) {
       return c.json({ error: 'Forbidden' }, 403);
     }

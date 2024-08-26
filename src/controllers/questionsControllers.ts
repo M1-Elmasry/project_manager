@@ -44,6 +44,7 @@ export default class QuestionsController {
   static async getAllQuestion(c: Context) {
     const userId = c.get('userId') as string;
     const projectId = c.get('projectId') as string;
+
     const questions = await dbClient.projects
       ?.aggregate([
         { $match: { _id: new ObjectId(projectId) } },
@@ -104,7 +105,7 @@ export default class QuestionsController {
       ])
       .toArray();
 
-    return c.json(questions, 201);
+    return c.json(questions, 200);
   }
 
   static async updateQuestion(c: Context) {

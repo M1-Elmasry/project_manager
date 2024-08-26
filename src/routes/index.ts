@@ -21,16 +21,16 @@ app.route('/auth', AuthRoute);
 app.route('/workspaces', WorkspacesRoute);
 app.route('workspaces/:workspaceId/projects', ProjectsRoute);
 
-app.route(
-  'workspaces/:workspaceId/projects/:projectId/questions',
-  QuestionsRoute,
-);
-
 // Use Workspace and Project guards on any route under a project after this line
 app.use(
   'workspaces/:workspaceId/projects/:projectId/*',
   WorkspaceGuard(),
   ProjectGuard(),
+);
+
+app.route(
+  'workspaces/:workspaceId/projects/:projectId/questions',
+  QuestionsRoute,
 );
 
 app.use(

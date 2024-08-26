@@ -13,9 +13,9 @@ export function ProjectGuard(options: GuardOptions = {}) {
     }
 
     const projectId: string = c.req.param('projectId');
-    //if (!projectId) {
-    //  throw new Error('please add projectId param to the route path');
-    //}
+    if (!projectId) {
+      throw new Error('please add projectId param to the route path');
+    }
 
     if (!isValidObjectId(projectId)) {
       return c.json({ error: 'Invalid project ID' }, 400);

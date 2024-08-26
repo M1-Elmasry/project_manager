@@ -82,6 +82,7 @@ export default class NotesController {
           },
         },
         { $unset: '_id' },
+        { $match: { $or: [{ isAuthor: true }, { isPublic: true }] } },
       ])
       .toArray();
 
@@ -96,7 +97,7 @@ export default class NotesController {
     if (!parseResults.success) {
       return c.json(
         {
-          error: 'invalid update Note payload',
+          error: 'invalid update note payload',
           validations: parseResults.error.errors,
         },
         400,

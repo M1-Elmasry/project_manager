@@ -13,6 +13,10 @@ tags:
     description: Endpooints related for workspaces operations
   - name: Projects
     description: Endpoints related fro projects operations
+  - name: Questions
+    description: Endpoints related to questions/replies operations
+  - name: Notes
+    description: Endpoints related to notes operations
 paths:
   /auth/register:
     post:
@@ -1136,6 +1140,779 @@ paths:
             application/json:
               example:
                 error: "Failed to remove members"
+  /workspaces/{workspaceId}/projects/{projectId}/questions:
+    get:
+      tags:
+        - Questions
+      summary: Get all questions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+      responses:
+        200:
+          description: All questions found.
+          content:
+            application/json:
+              example:
+                - id: "66cc6ce8e2132e3682e198a4"
+                  question: "Why the sky's color is blue?"
+                  created_at: "2024-08-26T11:54:16.349Z"
+                  isAuthor: true
+                  author:
+                    id: "66c67621445d7e187ffd4853"
+                    username: "Admin"
+                    email: "admin@example.com"
+                  replies:
+                    - id: "66cc71fd49611bb8a4518ca3"
+                      reply": "No body gonna know!!"
+                      isAuthor: true
+                      created_at: "2024-08-26T12:15:57.494Z"
+                      author":
+                        username: "Admin"
+                        email: "admin@example.com"
+                        id: "66c67621445d7e187ffd4853"
+                - id: "66cc6ce8e2132e3682e198a5"
+                  question: "Why the sky's color is blue?"
+                  created_at: "2024-08-26T11:54:45.875Z"
+                  created_at: "2024-08-26T11:54:16.349Z"
+                  isAuthor: false
+                  author:
+                    id: "66c67621445d7e187ffd4855"
+                    username: "User"
+                    email: "user@example.com"
+                  replies: []
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to see any questions.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+    post:
+      tags:
+        - Questions
+      summary: Create a new question and add it to a project.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+                  description: "The question to add."
+              required:
+                - question
+            example:
+              question: 'How it end up like that?'
+      responses:
+        201:
+          description: The question was created and added to the project.
+          content:
+            application/json:
+              example:
+                questionId: '66c7798ad1f4df22f9bdd934'
+        400:
+          description: Invalid request body fields.
+          content:
+            application/json:
+              example:
+                error: "invalid question payload"
+                validations:
+                  - "{...}"
+                  - "{...}"
+                  - "..."
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to create/add questions to the project.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server errro.
+          content:
+            application/json:
+              example:
+                error: "Failed to create a question"
+  /workspaces/{workspaceId}/projects/{projectId}/questions/{questionId}:
+    put:
+      tags:
+        - Questions
+      summary: Edit/Update question
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the question
+      responses:
+        200:
+          description: Question updated.
+          content:
+            application/json:
+              example:
+                updated: 1
+        400:
+          description: Invalid edit question payload.
+          content:
+            application/json:
+              example:
+                error: 'invalid update question payload'
+                validations:
+                  - "{...}"
+                  - "{...}"
+                  - "..."
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to edit the question.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server side error.
+          content:
+            application/json:
+              example:
+                error: "failed to update question"
+    delete:
+      tags:
+        - Questions
+      summary: Delete question
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the question
+      responses:
+        200:
+          description: Question deleted.
+          content:
+            application/json:
+              example:
+                deleted: 1
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to delete the question.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server side error.
+          content:
+            application/json:
+              example:
+                error: "failed to delete question"
+  /workspaces/{workspaceId}/projects/{projectId}/questions/{questionId}/replies:
+    post:
+      tags:
+        - Questions
+      summary: Create a reply to a question.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the question
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reply:
+                  type: string
+                  description: "The reply to the question."
+              required:
+                - reply
+            example:
+              reply: 'No body gonna know!!'
+      responses:
+        201:
+          description: The reply was added to the question.
+          content:
+            application/json:
+              example:
+                replyId: '66c7798ad1f4df22f9bdd934'
+        400:
+          description: Invalid reply payload.
+          content:
+            application/json:
+              example:
+                error: "invalid reply payload"
+                validations:
+                  - "{...}"
+                  - "{...}"
+                  - "..."
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to reply to the question
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server error.
+          content:
+            application/json:
+              example:
+                error: "Failed to create a question reply"
+  /workspaces/{workspaceId}/projects/{projectId}/questions/{questionId}/replies/{replyId}:
+    put:
+      tags:
+        - Questions
+      summary: Edit/Update reply. only the author can edit the reply.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the question
+        - name: replyId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the question reply
+      responses:
+        200:
+          description: Reply updated.
+          content:
+            application/json:
+              example:
+                updated: 1
+        400:
+          description: Invalid edit question reply payload.
+          content:
+            application/json:
+              example:
+                error: 'invalid update question reply payload'
+                validations:
+                  - "{...}"
+                  - "{...}"
+                  - "..."
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to edit the question reply.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server side error.
+          content:
+            application/json:
+              example:
+                error: "failed to update question reply"
+    delete:
+      tags:
+        - Questions
+      summary: Delete question reply. Author and the project owner could delete the reply.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the question
+        - name: replyId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the question reply
+      responses:
+        200:
+          description: Question reply deleted.
+          content:
+            application/json:
+              example:
+                deleted: 1
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to delete the question reply.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server side error.
+          content:
+            application/json:
+              example:
+                error: "failed to delete question reply"
+  /workspaces/{workspaceId}/projects/{projectId}/notes:
+    get:
+      tags:
+        - Notes
+      summary: Get all notes under a project
+      description: >
+        User could see owned and public notes under a project.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+      responses:
+        200:
+          description: All notes.
+          content:
+            application/json:
+              example:
+                - note: "Finish the project before the third deadline XD"
+                  id: "66cc849695de2429ef2f97f2"
+                  isAuthor: true
+                  isPublic: false
+                  created_at: "2024-08-26T13:35:18.293Z"
+                  author:
+                    id: "66c67621445d7e187ffd4853"
+                    username: "Admin"
+                    email: "admin@example.com"
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to see any notes.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+    post:
+      tags:
+        - Notes
+      summary: Create a new note
+      description: Creates a new provate note owned by the user.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  description: "The note to add."
+              required:
+                - note
+            example:
+              note: 'Finish the project before the third deadline XD'
+      responses:
+        201:
+          description: The note was created and added to the project.
+          content:
+            application/json:
+              example:
+                noteId: '66c7798ad1f4df22f9bdd934'
+        400:
+          description: Invalid note payload.
+          content:
+            application/json:
+              example:
+                error: "invalid note payload"
+                validations:
+                  - "{...}"
+                  - "{...}"
+                  - "..."
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to create notes.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server errro.
+          content:
+            application/json:
+              example:
+                error: "Failed to create a note"
+  /workspaces/{workspaceId}/projects/{projectId}/notes/{noteId}:
+    put:
+      tags:
+        - Notes
+      summary: Edit note
+      description: Only the note's author can edit the note.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the note
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  description: "The new note."
+              required:
+                - note
+            example:
+              note: 'Forget about that project, :)'
+      responses:
+        200:
+          description: note updated.
+          content:
+            application/json:
+              example:
+                updated: 1
+        400:
+          description: Invalid edit note payload.
+          content:
+            application/json:
+              example:
+                error: 'invalid update question payload'
+                validations:
+                  - "{...}"
+                  - "{...}"
+                  - "..."
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to edit the note.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server side error.
+          content:
+            application/json:
+              example:
+                error: "failed to update question"
+    delete:
+      tags:
+        - Notes
+      summary: Delete note
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the note
+      responses:
+        200:
+          description: Note deleted.
+          content:
+            application/json:
+              example:
+                deleted: 1
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to delete the note.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server side error.
+          content:
+            application/json:
+              example:
+                error: "failed to delete question"
+  /workspaces/{workspaceId}/projects/{projectId}/notes/{noteId}/set_public:
+    put:
+      tags:
+        - Notes
+      summary: Set a note as public
+      description: Only the note's author can set the note as public.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the note
+      responses:
+        200:
+          description: note updated.
+          content:
+            application/json:
+              example:
+                updated: 1
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to edit the note.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server side error.
+          content:
+            application/json:
+              example:
+                error: "failed to update question"
+  /workspaces/{workspaceId}/projects/{projectId}/notes/{noteId}/unset_public:
+    put:
+      tags:
+        - Notes
+      summary: Unset a note as public
+      description: Only the note's author can do this action.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the project
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the note
+      responses:
+        200:
+          description: note updated.
+          content:
+            application/json:
+              example:
+                updated: 1
+        401:
+          description: Unauthorized - The user is not authenticated.
+          content:
+            application/json:
+              example:
+                error: "Unauthorized"
+        403:
+          description: Forbidden - The user is not allowed to edit the note.
+          content:
+            application/json:
+              example:
+                error: "Forbidden"
+        500:
+          description: General server side error.
+          content:
+            application/json:
+              example:
+                error: "failed to update question"
 components:
   securitySchemes:
     bearerAuth:
