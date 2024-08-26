@@ -8,7 +8,7 @@ import dbClient from '../utils/db';
 import { ObjectId } from 'mongodb';
 import {
   isValidObjectId,
-  deleteProjectComponents,
+  //deleteProjectComponents,
   deleteWorkspace,
 } from '../utils/helpers';
 
@@ -231,19 +231,35 @@ class WorkspaceController {
 
   static async addMembers(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
-    const { members } = await c.req.json();
+    const { membersEmails } = await c.req.json();
 
-    if (!members || !Array.isArray(members) || members.length === 0) {
+    if (!membersEmails || !Array.isArray(membersEmails) || membersEmails.length === 0) {
       return c.json({ error: 'members field is required' }, 400);
     }
 
-    const memberIds: ObjectId[] = members
-      .filter((mId: string) => isValidObjectId(mId))
-      .map((mId: string) => new ObjectId(mId));
+    const members = await dbClient.users
+      ?.find({ $in: membersEmails })
+      .toArray();
+
+    if (!members || members.length === 0) {
+      return c.json({error: "email(s) not found"}, 400);
+    } 
+
+    const foundEmails = members.map((member) => member.email);
+
+    const notFoundEmails = membersEmails.filter(
+      (email) => !foundEmails.includes(email),
+    );
+
+    if (!notFoundEmails) {
+      return c.json({error: "some emails not found", notFoundEmails}, 400);
+    }
+
+    const membersIds = members.map((member) => member._id);
 
     const results = await dbClient.workspaces?.updateOne(
       { _id: new ObjectId(workspaceId) },
-      { $addToSet: { members: { $each: memberIds } } },
+      { $addToSet: { members: { $each: membersIds } } },
     );
 
     if (results?.acknowledged) {
@@ -255,24 +271,43 @@ class WorkspaceController {
 
   static async deleteMembers(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
-    const workspaceOwnerId = c.get('workspaceOwnerId') as string;
-    const { members } = await c.req.json();
+    //const workspaceOwnerId = c.get('workspaceOwnerId') as string;
+    const { membersEmails } = await c.req.json();
 
-    console.log(typeof members, members);
-    if (!members || !Array.isArray(members) || members.length === 0) {
+    if (!membersEmails || !Array.isArray(membersEmails) || membersEmails.length === 0) {
       return c.json({ error: 'members field is required' }, 400);
     }
 
-    const memberIds: ObjectId[] = members
-      .filter((mId: string) => isValidObjectId(mId) && mId !== workspaceOwnerId)
-      .map((mId: string) => new ObjectId(mId));
+    const members = await dbClient.users
+      ?.find({ $in: membersEmails })
+      .toArray();
 
-    console.log('to delete:', memberIds);
+    if (!members || members.length === 0) {
+      return c.json({error: "email(s) not found"}, 400);
+    } 
+
+    const foundEmails = members.map((member) => member.email);
+
+    const notFoundEmails = membersEmails.filter(
+      (email) => !foundEmails.includes(email),
+    );
+
+    if (!notFoundEmails) {
+      return c.json({error: "some emails not found", notFoundEmails}, 400);
+    }
+
+    const membersIds = members.map((member) => member._id);
+
+    //const memberIds: ObjectId[] = members
+    //  .filter((mId: string) => isValidObjectId(mId) && mId !== workspaceOwnerId)
+    //  .map((mId: string) => new ObjectId(mId));
+
+    console.log('to delete:', membersIds);
 
     const results = await dbClient.workspaces?.updateOne(
       { _id: new ObjectId(workspaceId) },
       // @ts-ignore
-      { $pull: { members: { $in: memberIds } } },
+      { $pull: { members: { $in: membersIds } } },
     );
 
     if (results?.acknowledged) {
