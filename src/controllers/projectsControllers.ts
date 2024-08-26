@@ -7,7 +7,7 @@ import {
 import dbClient from '../utils/db';
 import { ObjectId, WithId } from 'mongodb';
 import { Workspace } from '../types/workspaces';
-import { isValidObjectId, deleteProjectComponents } from '../utils/helpers';
+import { deleteProject, isValidObjectId } from '../utils/helpers';
 
 export default class ProjectsControllers {
   static async getAllJoinedProjects(c: Context) {
@@ -21,6 +21,21 @@ export default class ProjectsControllers {
             localField: 'projects',
             foreignField: '_id',
             as: 'project',
+            pipeline: [
+              {
+                $lookup: {
+                  from: 'users',
+                  localField: 'owner',
+                  foreignField: '_id',
+                  as: 'owner',
+                  pipeline: [
+                    { $set: { id: '$_id' } },
+                    { $unset: ['_id', 'password'] },
+                  ],
+                },
+              },
+              { $unwind: '$owner' },
+            ],
           },
         },
         {
@@ -28,18 +43,16 @@ export default class ProjectsControllers {
         },
         {
           $project: {
-            _id: '$project._id',
+            _id: 0,
+            id: '$project._id',
             name: '$project.name',
             description: '$project.description',
             deadline: '$project.deadline',
             owner: '$project.owner',
             all_states: '$project.all_states',
             all_labels: '$project.all_labels',
-            members: '$project.members',
-            tasks: '$project.tasks',
-            notes: '$project.notes',
-            questions: '$project.questions',
             created_at: '$project.created_at',
+            isOwner: { $eq: [new ObjectId(userId), '$project.owner.id'] },
           },
         },
       ])
@@ -100,11 +113,20 @@ export default class ProjectsControllers {
 
   static async getProject(c: Context) {
     const userId = c.get('userId') as string;
-    const project = c.get('project') as WithId<ProjectDocument>;
+    const projectId = c.get('projectId') as string;
+    const project = c.get('project') as Partial<WithId<ProjectDocument>>;
     const owner = await dbClient.users?.findOne({ _id: new ObjectId(userId) });
     const isOwner = c.get('isProjectOwner');
+
+    delete project._id;
+    delete project.members;
+    delete project.tasks;
+    delete project.notes;
+    delete project.questions;
+
     return c.json(
       {
+        id: projectId,
         ...project,
         isOwner,
         // override owner property in project to be owner obj instead of id
@@ -162,10 +184,9 @@ export default class ProjectsControllers {
     const project = c.get('project') as WithId<ProjectDocument>;
     const workspace = c.get('workspace') as WithId<Workspace>;
 
-    try {
-      await deleteProjectComponents(project);
-    } catch (err) {
-      return c.json({ error: (err as Error).message }, 500);
+    const isDeleted = await deleteProject(new ObjectId(projectId));
+    if (!isDeleted) {
+      return c.json({ error: 'failed to delete a project' }, 500);
     }
 
     const updateResult = await dbClient.workspaces?.updateOne(
@@ -177,15 +198,7 @@ export default class ProjectsControllers {
       return c.json({ error: 'failed to remove project from workspace' }, 500);
     }
 
-    const deleteResult = await dbClient.projects?.deleteOne({
-      _id: new ObjectId(projectId),
-    });
-
-    if (!deleteResult?.acknowledged) {
-      return c.json({ error: 'failed to remove a project' }, 500);
-    }
-
-    return c.json({ deleted: deleteResult?.deletedCount }, 200);
+    return c.json({ deleted: 1 }, 200);
   }
 
   static async addMembers(c: Context) {

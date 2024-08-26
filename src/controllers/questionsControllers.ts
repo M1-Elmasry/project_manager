@@ -1,7 +1,8 @@
 import { Context } from 'hono';
-import { QuestionDocument, QuestionPayloadSchema } from '../types/projects';
+import { QuestionPayloadSchema } from '../types/projects';
 import dbClient from '../utils/db';
-import { ObjectId, WithId } from 'mongodb';
+import { deleteQuestion } from '../utils/helpers';
+import { ObjectId } from 'mongodb';
 
 export default class QuestionsController {
   static async createQuestion(c: Context) {
@@ -136,34 +137,17 @@ export default class QuestionsController {
   static async deleteQuestion(c: Context) {
     const questionId = c.get('questionId') as string;
     const projectId = c.get('projectId') as string;
-    const question = c.get('question') as WithId<QuestionDocument>;
 
-    // delete all question's replies
-    const deleteReplies = await dbClient.replies?.deleteMany({
-      _id: { $in: question?.replies ?? [] },
-    });
-
-    if (!deleteReplies?.acknowledged) {
-      return c.json({ error: "cannot delete question's replies" }, 500);
-    }
-
-    const deleteQuestion = await dbClient.questions?.deleteOne({
-      _id: new ObjectId(questionId),
-    });
-    if (!deleteQuestion?.acknowledged) {
-      return c.json({ error: "cannot delete question's replies" }, 500);
+    const isDeleted = await deleteQuestion(new ObjectId(questionId));
+    if (!isDeleted) {
+      return c.json({ error: 'failed to delete a question' }, 500);
     }
 
     await dbClient.projects?.updateOne(
       { _id: new ObjectId(projectId) },
       { $pull: { questions: new ObjectId(questionId) } },
     );
-    return c.json(
-      {
-        deletedQuestions: deleteQuestion.deletedCount,
-        deletedReplies: deleteReplies.deletedCount,
-      },
-      200,
-    );
+
+    return c.json({ deleted: 1 }, 200);
   }
 }
