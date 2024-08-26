@@ -203,19 +203,40 @@ export default class ProjectsControllers {
 
   static async addMembers(c: Context) {
     const projectId = c.get('projectId') as string;
-    const { members } = await c.req.json();
+    const { membersEmails } = await c.req.json();
 
-    if (!members || !Array.isArray(members) || members.length === 0) {
+    if (!membersEmails || !Array.isArray(membersEmails) || membersEmails.length === 0) {
       return c.json({ error: 'members field is required' }, 400);
     }
 
-    const memberIds: ObjectId[] = members
-      .filter((mId: string) => isValidObjectId(mId))
-      .map((mId: string) => new ObjectId(mId));
+    const members = await dbClient.users
+      ?.find({ $in: membersEmails })
+      .toArray();
+
+    if (!members || members.length === 0) {
+      return c.json({error: "email(s) not found"}, 400);
+    } 
+
+    const foundEmails = members.map((member) => member.email);
+
+    const notFoundEmails = membersEmails.filter(
+      (email) => !foundEmails.includes(email),
+    );
+
+    if (!notFoundEmails) {
+      return c.json({error: "some emails not found", notFoundEmails}, 400);
+    }
+
+    const membersIds = members.map((member) => member._id);
+
+
+    //const memberIds: ObjectId[] = members
+    //  .filter((mId: string) => isValidObjectId(mId))
+    //  .map((mId: string) => new ObjectId(mId));
 
     const results = await dbClient.projects?.updateOne(
       { _id: new ObjectId(projectId) },
-      { $addToSet: { members: { $each: memberIds } } },
+      { $addToSet: { members: { $each: membersIds } } },
     );
 
     if (results?.acknowledged) {
@@ -269,24 +290,45 @@ export default class ProjectsControllers {
 
   static async deleteMembers(c: Context) {
     const projectId = c.get('projectId') as string;
-    const projectOwnerId = c.get('projectOwnerId') as string;
-    const { members } = await c.req.json();
+    //const projectOwnerId = c.get('projectOwnerId') as string;
+    const { membersEmails } = await c.req.json();
 
-    console.log(typeof members, members);
-    if (!members || !Array.isArray(members) || members.length === 0) {
+    //console.log(typeof members, members);
+    if (!membersEmails || !Array.isArray(membersEmails) || membersEmails.length === 0) {
       return c.json({ error: 'members field is required' }, 400);
     }
 
-    const memberIds: ObjectId[] = members
-      .filter((mId: string) => isValidObjectId(mId) && mId !== projectOwnerId)
-      .map((mId: string) => new ObjectId(mId));
+    const members = await dbClient.users
+      ?.find({ $in: membersEmails })
+      .toArray();
 
-    console.log('to delete:', memberIds);
+    if (!members || members.length === 0) {
+      return c.json({error: "email(s) not found"}, 400);
+    } 
+
+    const foundEmails = members.map((member) => member.email);
+
+    const notFoundEmails = membersEmails.filter(
+      (email) => !foundEmails.includes(email),
+    );
+
+    if (!notFoundEmails) {
+      return c.json({error: "some emails not found", notFoundEmails}, 400);
+    }
+
+    const membersIds = members.map((member) => member._id);
+
+
+    //const memberIds: ObjectId[] = members
+    //  .filter((mId: string) => isValidObjectId(mId) && mId !== projectOwnerId)
+    //  .map((mId: string) => new ObjectId(mId));
+
+    console.log('to delete:', membersIds);
 
     const results = await dbClient.projects?.updateOne(
       { _id: new ObjectId(projectId) },
       // @ts-ignore
-      { $pull: { members: { $in: memberIds } } },
+      { $pull: { members: { $in: membersIds } } },
     );
 
     if (results?.acknowledged) {
