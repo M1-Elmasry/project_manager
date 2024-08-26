@@ -27,7 +27,7 @@ export type ReplyPayload = z.infer<typeof ReplyPayloadSchema>;
 export const ProjectUpdatePayloadSchema = z.object({
   name: z.string().min(3).optional(),
   description: z.string().optional(),
-  deadline: z.date().optional(),
+  deadline: z.string().date().optional(),
 });
 
 export type ProjectUpdatePayload = z.infer<typeof ProjectUpdatePayloadSchema>;
