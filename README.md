@@ -3,7 +3,7 @@
 This repository contains the backend code for our ALX portfolio project, a project management tool designed to facilitate team collaboration. The project is part of a micro-repo structure, where the backend, frontend, and other components are developed separately to streamline the development process.
 
 The frontend repository: [TaskHive](https://github.com/Mahmoud-Samy-Creator/TaskHive-web-app-client)
-The docker image: (davenchy/project-manager)(https://hub.docker.com/repository/docker/davenchy/project-manager)
+The docker image: [davenchy/project-manager](https://hub.docker.com/repository/docker/davenchy/project-manager)
 
 ## Table of Contents
 - [Minimum Viable Product (MVP) Features](#minimum-viable-product-mvp-features)
