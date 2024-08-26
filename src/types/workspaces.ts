@@ -21,3 +21,11 @@ export type Workspace = WorkspacePayload & {
   projects: ObjectId[];
   members: ObjectId[];
 };
+
+export const WorkspaceAddMemberSchema = z.object({
+  email: z.string().email("member's email is not valid"),
+});
+
+export type WorkspaceAddMemberPayload = z.infer<
+  typeof WorkspaceAddMemberSchema
+>;

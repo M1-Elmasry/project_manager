@@ -9,6 +9,7 @@ import { SERVER_HOST, SERVER_PORT } from './utils/constants';
 
 const app = new Hono();
 
+app.use(logger());
 app.use(cors());
 
 app.use(
@@ -19,8 +20,7 @@ app.use(
   }),
 );
 
-app.use(logger());
-
+app.get('/', (c) => c.redirect('/docs'));
 app.route('/', APIRoutes);
 
 serve({

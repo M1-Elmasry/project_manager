@@ -38,21 +38,21 @@ route.get(
   WorkspacesController.getWorkspaceMembers,
 );
 
-route.post(
-  '/:workspaceId/members',
+route.put(
+  '/:workspaceId/add_member',
   AuthGuard,
   WorkspaceGuard({ onlyOwner: true }),
-  WorkspacesController.addMembers,
+  WorkspacesController.addMember,
 );
 
-route.delete(
-  '/:workspaceId/members',
+route.put(
+  '/:workspaceId/remove_members',
   AuthGuard,
   WorkspaceGuard({ onlyOwner: true }),
   WorkspacesController.deleteMembers,
 );
 
-route.post(
+route.put(
   '/:workspaceId/change_owner',
   AuthGuard,
   WorkspaceGuard({ onlyOwner: true }),
