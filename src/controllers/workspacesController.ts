@@ -6,7 +6,7 @@ import {
   WorkspaceUpdatePayloadSchema,
 } from '../types/workspaces';
 import dbClient from '../utils/db';
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithId } from 'mongodb';
 import { isValidObjectId, deleteWorkspace } from '../utils/helpers';
 
 class WorkspaceController {
@@ -228,6 +228,7 @@ class WorkspaceController {
 
   static async addMember(c: Context) {
     const workspaceId = c.get('workspaceId') as string;
+    const workspace = c.get('workspace') as WithId<Workspace>;
     const payload = await c.req.json();
     const payloadValidationResult = WorkspaceAddMemberSchema.safeParse(payload);
 
@@ -249,13 +250,22 @@ class WorkspaceController {
       return c.json({ error: 'no user found with the same email' }, 404);
     }
 
+    if (workspace.members.includes(user._id)) {
+      return c.json(
+        { error: "user aleady exists in this worksapce's members" },
+        400,
+      );
+    }
+
     const results = await dbClient.workspaces?.updateOne(
       { _id: new ObjectId(workspaceId) },
       { $addToSet: { members: user._id } },
     );
 
     if (results?.acknowledged) {
-      return c.json({ added: results?.modifiedCount || 0 });
+      return c.json({
+        addedUser: { ...user, id: user._id },
+      });
     }
 
     return c.json({ error: 'failed to add member to workspace' }, 500);
