@@ -2050,6 +2050,17 @@ paths:
               example:
                 error: "Unauthorized"
 
+        403:
+          description: Forbidden - You do not have permission to update this task
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Forbidden"
+
   /workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}:
     put:
       tags:
@@ -2254,6 +2265,262 @@ paths:
             application/json:
               example:
                 error: "Unauthorized"
+
+  /workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/checklists:
+    post:
+      tags:
+        - Checklists
+      summary: Create a new checklist
+      description: Create a new checklist and add it to a task.
+      operationId: createChecklist
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Checklist Title"
+      responses:
+        '201':
+          description: Checklist created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  checklistId:
+                    type: string
+                    example: "64f7e3d9c89ebc1d0c8b45a9"
+        '400':
+          description: Invalid create checklist payload.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  validations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                        message:
+                          type: string
+        '401':
+          description: Unauthorized - Invalid authorization or token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: Not found - Workspace, project, or task not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Failed to create checklist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /workspaces/{workspaceId}/projects/{projectId}/tasks/{taskId}/checklists/{checklistId}:
+    put:
+      tags:
+        - Checklists
+      summary: Update a checklist
+      description: Update an existing checklist in a task.
+      operationId: updateChecklist
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Updated Checklist Title"
+      responses:
+        '200':
+          description: Checklist updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: integer
+                    example: 1
+        '400':
+          description: Invalid update checklist payload.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  validations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                        message:
+                          type: string
+        '401':
+          description: Unauthorized - Invalid authorization or token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: Not found - Workspace, project, task, or checklist not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Failed to update checklist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+    delete:
+      tags:
+        - Checklists
+      summary: Delete a checklist
+      description: Delete an existing checklist from a task.
+      operationId: deleteChecklist
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: checklistId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Checklist deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: integer
+                    example: 1
+        '401':
+          description: Unauthorized - Invalid authorization or token.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: Not found - Workspace, project, task, or checklist not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Failed to delete checklist.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
 
 components:
   securitySchemes:
