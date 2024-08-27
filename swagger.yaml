@@ -518,7 +518,7 @@ paths:
                   username: "username"
                   email: "user@example.com"
         400:
-          description: Members field is required - The request body is missing the members field.
+          description: Email field is required - The request body is missing the email field or the email or the user you want to add is already member.
           content:
             application/json:
               example:
