@@ -250,7 +250,7 @@ class WorkspaceController {
       return c.json({ error: 'no user found with the same email' }, 404);
     }
 
-    if (workspace.members.includes(user._id)) {
+    if (workspace.members.some((member) => member.equals(user._id))) {
       return c.json(
         { error: "user aleady exists in this worksapce's members" },
         400,
@@ -264,7 +264,7 @@ class WorkspaceController {
 
     if (results?.acknowledged) {
       return c.json({
-        addedUser: { ...user, id: user._id },
+        addedUser: { id: user._id, username: user.username, email: user.email }
       });
     }
 
