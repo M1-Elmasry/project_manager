@@ -27,19 +27,23 @@ export default class TasksController {
             localField: 'checklists',
             foreignField: '_id',
             as: 'checklists',
-            pipeline: [
-              {
-                $lookup: {
-                  from: 'checklistItems',
-                  localField: 'items',
-                  foreignField: '_id',
-                  as: 'items',
-                  pipeline: [{ $set: { id: '$_id' } }, { $unset: '_id' }],
-                },
-              },
-              { $set: { id: '$_id' } },
-              { $unset: '_id' },
-            ],
+
+            // !WARN: below throw error when get tasks
+            
+            //pipeline: [
+            //  {
+            //    $lookup: {
+            //      from: 'checklistItems',
+            //      localField: 'items',
+            //      foreignField: '_id',
+            //      as: 'items',
+            //      pipeline: [{ $set: { id: '$_id' } }, { $unset: '_id' }],
+            //    },
+            //  },
+            //  { $set: { id: '$_id' } },
+            //  { $unset: '_id' },
+            //],
+
           },
         },
         { $set: { id: '$_id' } },

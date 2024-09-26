@@ -1955,6 +1955,10 @@ paths:
                     body:
                       type: string
                       example: "Task description"
+                    startdate:
+                      type: string
+                      format: date
+                      example: "2024-08-28"
                     deadline:
                       type: string
                       format: date
@@ -2019,18 +2023,10 @@ paths:
                 body:
                   type: string
                   example: "Description of the task."
-                deadline:
-                  type: string
-                  format: date
-                  example: "2024-08-30"
                 state:
                   type: string
                   example: "Pending"
-                labels:
-                  type: array
-                  items:
-                    type: string
-                  example: ["frontend", "high-priority"]
+         
       responses:
         '201':
           description: Task created successfully.
@@ -2101,6 +2097,10 @@ paths:
                 body:
                   type: string
                   example: "Updated description of the task."
+                startdate:
+                  type: string
+                  format: date
+                  example: "2024-08-28"
                 deadline:
                   type: string
                   format: date

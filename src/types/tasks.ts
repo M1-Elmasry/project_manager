@@ -6,14 +6,16 @@ import { z } from 'zod';
 export const TaskPayloadSchema = z.object({
   title: z.string().min(3),
   body: z.string(),
-  deadline: z.string().date('example: yyyy-mm-dd').optional(),
   state: z.string().min(1, 'state cannot be empty'),
-  labels: z.array(z.string()),
+  startdate: z.string().date('example: yyyy-mm-dd').optional(),
+  deadline: z.string().date('example: yyyy-mm-dd').optional(),
+  labels: z.array(z.string()).optional(),
 });
 
 export const TaskUpdatePayloadSchema = z.object({
   title: z.string().min(3).optional(),
   body: z.string().optional(),
+  startdate: z.string().date('example: yyyy-mm-dd').optional(),
   deadline: z.string().date('example: yyyy-mm-dd').optional(),
   state: z.string().min(1, 'state cannot be empty').optional(),
   labels: z.array(z.string()).optional(),
