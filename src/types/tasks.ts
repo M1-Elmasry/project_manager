@@ -8,7 +8,7 @@ export const TaskPayloadSchema = z.object({
   body: z.string(),
   deadline: z.string().date('example: yyyy-mm-dd').optional(),
   state: z.string().min(1, 'state cannot be empty'),
-  labels: z.array(z.string()),
+  labels: z.array(z.string()).optional(),
 });
 
 export const TaskUpdatePayloadSchema = z.object({
