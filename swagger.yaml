@@ -1955,6 +1955,10 @@ paths:
                     body:
                       type: string
                       example: "Task description"
+                    startdate:
+                      type: string
+                      format: date
+                      example: "2024-08-28"
                     deadline:
                       type: string
                       format: date
@@ -2022,6 +2026,7 @@ paths:
                 state:
                   type: string
                   example: "Pending"
+         
       responses:
         '201':
           description: Task created successfully.
@@ -2092,6 +2097,10 @@ paths:
                 body:
                   type: string
                   example: "Updated description of the task."
+                startdate:
+                  type: string
+                  format: date
+                  example: "2024-08-28"
                 deadline:
                   type: string
                   format: date
