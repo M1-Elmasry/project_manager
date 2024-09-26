@@ -2019,18 +2019,9 @@ paths:
                 body:
                   type: string
                   example: "Description of the task."
-                deadline:
-                  type: string
-                  format: date
-                  example: "2024-08-30"
                 state:
                   type: string
                   example: "Pending"
-                labels:
-                  type: array
-                  items:
-                    type: string
-                  example: ["frontend", "high-priority"]
       responses:
         '201':
           description: Task created successfully.
