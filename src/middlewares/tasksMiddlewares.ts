@@ -1,6 +1,6 @@
 import { Context, Next } from 'hono';
 import { ObjectId } from 'mongodb';
-import dbClient from '../utils/db';
+import dbClient from '@utils/db';
 import { guardUsageValidator } from './utils';
 
 export function TaskGuard() {

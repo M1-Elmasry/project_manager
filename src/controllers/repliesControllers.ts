@@ -1,6 +1,6 @@
 import { Context } from 'hono';
-import { ReplyPayloadSchema } from '../types/projects';
-import dbClient from '../utils/db';
+import { ReplyPayloadSchema } from '@typing/projects';
+import dbClient from '@utils/db';
 import { ObjectId } from 'mongodb';
 
 export default class RepliesController {

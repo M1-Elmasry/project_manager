@@ -4,10 +4,10 @@ import {
   WorkspaceAddMemberSchema,
   WorkspacePayloadSchema,
   WorkspaceUpdatePayloadSchema,
-} from '../types/workspaces';
-import dbClient from '../utils/db';
+} from '@typing/workspaces';
+import dbClient from '@utils/db';
 import { ObjectId, WithId } from 'mongodb';
-import { isValidObjectId, deleteWorkspace } from '../utils/helpers';
+import { isValidObjectId, deleteWorkspace } from '@utils/helpers';
 
 class WorkspaceController {
   // CRUD //
@@ -264,7 +264,7 @@ class WorkspaceController {
 
     if (results?.acknowledged) {
       return c.json({
-        addedUser: { id: user._id, username: user.username, email: user.email }
+        addedUser: { id: user._id, username: user.username, email: user.email },
       });
     }
 

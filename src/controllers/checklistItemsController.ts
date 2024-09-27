@@ -1,7 +1,7 @@
 import type { Context } from 'hono';
-import dbClient from '../utils/db';
+import dbClient from '@utils/db';
 import { ObjectId } from 'mongodb';
-import { ChecklistItemPayloadSchema } from '../types/tasks';
+import { ChecklistItemPayloadSchema } from '@typing/tasks';
 
 export default class ChecklistItemsController {
   static async createItem(c: Context) {

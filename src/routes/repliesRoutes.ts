@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { ReplyGuard } from '../middlewares/repliesMiddlewares';
-import RepliesController from '../controllers/repliesControllers';
+import { ReplyGuard } from '@middlewares/repliesMiddlewares';
+import RepliesController from '@controllers/repliesControllers';
 
 const app = new Hono();
 

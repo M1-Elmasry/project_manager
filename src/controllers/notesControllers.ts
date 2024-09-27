@@ -1,6 +1,6 @@
 import { Context } from 'hono';
-import { NotePayloadSchema } from '../types/projects';
-import dbClient from '../utils/db';
+import { NotePayloadSchema } from '@typing/projects';
+import dbClient from '@utils/db';
 import { ObjectId } from 'mongodb';
 
 export default class NotesController {

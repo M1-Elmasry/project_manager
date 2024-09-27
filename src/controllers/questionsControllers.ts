@@ -1,7 +1,7 @@
 import { Context } from 'hono';
-import { QuestionPayloadSchema } from '../types/projects';
-import dbClient from '../utils/db';
-import { deleteQuestion } from '../utils/helpers';
+import { QuestionPayloadSchema } from '@typing/projects';
+import dbClient from '@utils/db';
+import { deleteQuestion } from '@utils/helpers';
 import { ObjectId } from 'mongodb';
 
 export default class QuestionsController {

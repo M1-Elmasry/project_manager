@@ -1,7 +1,7 @@
 import { Context, Next } from 'hono';
-import { isValidObjectId } from '../utils/helpers';
+import { isValidObjectId } from '@utils/helpers';
 import { ObjectId } from 'mongodb';
-import dbClient from '../utils/db';
+import dbClient from '@utils/db';
 
 export type ReplyGuardOption = {
   allowAdmins?: boolean;

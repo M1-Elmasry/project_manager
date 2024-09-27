@@ -1,8 +1,8 @@
 import { Context, Next } from 'hono';
 import { GuardOptions } from './utils';
-import { isValidObjectId } from '../utils/helpers';
+import { isValidObjectId } from '@utils/helpers';
 import { ObjectId } from 'mongodb';
-import dbClient from '../utils/db';
+import dbClient from '@utils/db';
 
 export function ProjectGuard(options: GuardOptions = {}) {
   return async (c: Context, next: Next) => {

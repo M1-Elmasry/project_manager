@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import dbClient from '../utils/db';
+import dbClient from '@utils/db';
 
 /**
  * Safely validates if an object id is valid or not without throwing an error

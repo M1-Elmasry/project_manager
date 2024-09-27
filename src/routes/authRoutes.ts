@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import AuthController from '../controllers/authControllers';
-import { AuthGuard } from '../middlewares/authMiddelwares';
+import AuthController from '@controllers/authControllers';
+import { AuthGuard } from '@middlewares/authMiddelwares';
 
 const app = new Hono();
 

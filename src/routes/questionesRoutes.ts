@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import QuestionsController from '../controllers/questionsControllers';
-import { QuestionGuard } from '../middlewares/questionsMiddlewares';
+import QuestionsController from '@controllers/questionsControllers';
+import { QuestionGuard } from '@middlewares/questionsMiddlewares';
 
 const app = new Hono();
 

@@ -1,8 +1,8 @@
 import type { Context } from 'hono';
-import { TaskPayloadSchema, TaskUpdatePayloadSchema } from '../types/tasks';
-import dbClient from '../utils/db';
+import { TaskPayloadSchema, TaskUpdatePayloadSchema } from '@typing/tasks';
+import dbClient from '@utils/db';
 import { ObjectId } from 'mongodb';
-import { deleteTask } from '../utils/helpers';
+import { deleteTask } from '@utils/helpers';
 
 export default class TasksController {
   static async getTasks(c: Context) {
@@ -29,7 +29,7 @@ export default class TasksController {
             as: 'checklists',
 
             // !WARN: below throw error when get tasks
-            
+
             //pipeline: [
             //  {
             //    $lookup: {
@@ -43,7 +43,6 @@ export default class TasksController {
             //  { $set: { id: '$_id' } },
             //  { $unset: '_id' },
             //],
-
           },
         },
         { $set: { id: '$_id' } },

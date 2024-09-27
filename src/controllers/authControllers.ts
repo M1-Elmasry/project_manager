@@ -1,9 +1,9 @@
 import type { Context } from 'hono';
 import bcrypt from 'bcrypt';
-import dbClient from '../utils/db';
-import { User, UserSchema, UserCredentialsSchema } from '../types/auth';
+import dbClient from '@utils/db';
+import { User, UserSchema, UserCredentialsSchema } from '@typing/auth';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET_KEY } from '../utils/constants';
+import { JWT_SECRET_KEY } from '@utils/constants';
 import { ObjectId, WithId } from 'mongodb';
 
 export default class AuthController {

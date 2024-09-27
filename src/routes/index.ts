@@ -7,10 +7,10 @@ import QuestionsRoute from './questionesRoutes';
 import RepliesRoute from './repliesRoutes';
 import NotesRoute from './notesRoutes';
 import TasksRoute from './tasksRoute';
-import { AuthGuard } from '../middlewares/authMiddelwares';
-import { WorkspaceGuard } from '../middlewares/workspacesMiddlewares';
-import { ProjectGuard } from '../middlewares/projectsMiddlewares';
-import { QuestionGuard } from '../middlewares/questionsMiddlewares';
+import { AuthGuard } from '@middlewares/authMiddelwares';
+import { WorkspaceGuard } from '@middlewares/workspacesMiddlewares';
+import { ProjectGuard } from '@middlewares/projectsMiddlewares';
+import { QuestionGuard } from '@middlewares/questionsMiddlewares';
 
 const app = new Hono();
 

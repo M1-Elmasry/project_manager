@@ -3,11 +3,11 @@ import {
   ProjectDocument,
   ProjectPayloadSchema,
   ProjectUpdatePayloadSchema,
-} from '../types/projects';
-import dbClient from '../utils/db';
+} from '@typing/projects';
+import dbClient from '@utils/db';
 import { ObjectId, WithId } from 'mongodb';
-import { Workspace } from '../types/workspaces';
-import { deleteProject, isValidObjectId } from '../utils/helpers';
+import { Workspace } from '@typing/workspaces';
+import { deleteProject, isValidObjectId } from '@utils/helpers';
 
 export default class ProjectsControllers {
   static async getAllJoinedProjects(c: Context) {

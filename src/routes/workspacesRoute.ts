@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
-import WorkspacesController from '../controllers/workspacesController';
-import { AuthGuard } from '../middlewares/authMiddelwares';
-import { WorkspaceGuard } from '../middlewares/workspacesMiddlewares';
+import WorkspacesController from '@controllers/workspacesController';
+import { AuthGuard } from '@middlewares/authMiddelwares';
+import { WorkspaceGuard } from '@middlewares/workspacesMiddlewares';
 
 const route = new Hono();
 

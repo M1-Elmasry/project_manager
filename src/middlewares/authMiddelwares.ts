@@ -1,8 +1,8 @@
 import { Context } from 'hono';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET_KEY } from '../utils/constants';
-import { isValidObjectId } from '../utils/helpers';
-import dbClient from '../utils/db';
+import { JWT_SECRET_KEY } from '@utils/constants';
+import { isValidObjectId } from '@utils/helpers';
+import dbClient from '@utils/db';
 import { ObjectId } from 'mongodb';
 
 type JWTPayload = {

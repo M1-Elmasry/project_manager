@@ -1,7 +1,7 @@
 import type { Context, Next } from 'hono';
-import dbClient from '../utils/db';
+import dbClient from '@utils/db';
 import { ObjectId } from 'mongodb';
-import { isValidObjectId } from '../utils/helpers';
+import { isValidObjectId } from '@utils/helpers';
 import { GuardOptions } from './utils';
 
 // export interface WorkspaceGuardOptions {

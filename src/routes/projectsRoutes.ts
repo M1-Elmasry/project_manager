@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
-import { AuthGuard } from '../middlewares/authMiddelwares';
-import { WorkspaceGuard } from '../middlewares/workspacesMiddlewares';
-import ProjectsControllers from '../controllers/projectsControllers';
-import { ProjectGuard } from '../middlewares/projectsMiddlewares';
+import { AuthGuard } from '@middlewares/authMiddelwares';
+import { WorkspaceGuard } from '@middlewares/workspacesMiddlewares';
+import ProjectsControllers from '@controllers/projectsControllers';
+import { ProjectGuard } from '@middlewares/projectsMiddlewares';
 
 const app = new Hono();
 

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import NotesController from '../controllers/notesControllers';
-import { NoteGuard } from '../middlewares/notesMiddlewares';
+import NotesController from '@controllers/notesControllers';
+import { NoteGuard } from '@middlewares/notesMiddlewares';
 
 const app = new Hono();
 

@@ -1,12 +1,12 @@
 import { MongoClient } from 'mongodb';
 import { DB_HOST, DB_PORT, DB_NAME } from './constants';
 import type { Db, Collection } from 'mongodb';
-import type { UserDocument } from '../types/auth';
-import type { Workspace } from '../types/workspaces';
-import type { ProjectDocument } from '../types/projects';
-import type { NoteDocument } from '../types/projects';
-import type { QuestionDocument } from '../types/projects';
-import type { ReplyDocument } from '../types/projects';
+import type { UserDocument } from '@typing/auth';
+import type { Workspace } from '@typing/workspaces';
+import type { ProjectDocument } from '@typing/projects';
+import type { NoteDocument } from '@typing/projects';
+import type { QuestionDocument } from '@typing/projects';
+import type { ReplyDocument } from '@typing/projects';
 import {
   ChecklistDocument,
   ChecklistItemDocument,
@@ -34,6 +34,7 @@ class DBClient {
     this.host = host || DB_HOST;
     this.port = port || DB_PORT;
     this.databaseName = databaseName || DB_NAME;
+  }
 
   async connect() {
     return MongoClient.connect(`mongodb://${this.host}:${this.port}`)

@@ -1,5 +1,5 @@
 import { Context } from 'hono';
-import { isValidObjectId } from '../utils/helpers';
+import { isValidObjectId } from '@utils/helpers';
 
 export interface GuardOptions {
   onlyOwner?: boolean;

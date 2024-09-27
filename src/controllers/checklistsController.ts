@@ -1,7 +1,7 @@
-import { ChecklistPayloadSchema } from '../types/tasks';
-import dbClient from '../utils/db';
+import { ChecklistPayloadSchema } from '@typing/tasks';
+import dbClient from '@utils/db';
 import { ObjectId } from 'mongodb';
-import { deleteChecklist } from '../utils/helpers';
+import { deleteChecklist } from '@utils/helpers';
 import type { Context } from 'hono';
 
 export default class ChecklistsController {

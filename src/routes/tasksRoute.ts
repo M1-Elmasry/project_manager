@@ -1,12 +1,12 @@
 import { Hono } from 'hono';
-import TasksController from '../controllers/tasksController';
-import ChecklistsController from '../controllers/checklistsController';
-import ChecklistItemsController from '../controllers/checklistItemsController';
+import TasksController from '@controllers/tasksController';
+import ChecklistsController from '@controllers/checklistsController';
+import ChecklistItemsController from '@controllers/checklistItemsController';
 import {
   ChecklistGuard,
   ChecklistItemGuard,
   TaskGuard,
-} from '../middlewares/tasksMiddlewares';
+} from '@middlewares/tasksMiddlewares';
 
 const tasksRoute = new Hono();
 const checklistsRoute = new Hono();
