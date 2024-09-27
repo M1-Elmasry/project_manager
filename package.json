@@ -18,11 +18,11 @@
   ],
   "main": "dist/server.js",
   "scripts": {
-    "start": "node .",
-    "dev": "nodemon --watch ./swagger.yaml --watch ./src src/server.ts",
+    "start": "TS_NODE_BASEURL=./dist node -r tsconfig-paths/register .",
+    "dev": "nodemon src/server.ts",
     "build": "tsc --build",
-    "typing": "npx tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
+    "typing": "tsc --noEmit",
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
@@ -50,6 +50,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.8.0",
     "swagger-ui": "^5.17.14",
+    "tsconfig-paths": "^4.2.0",
     "yamljs": "^0.3.0",
     "zod": "^3.23.8"
   }
