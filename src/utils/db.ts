@@ -37,6 +37,7 @@ class DBClient {
   }
 
   async connect() {
+    if (this.client) return;
     return MongoClient.connect(`mongodb://${this.host}:${this.port}`)
       .then((client: MongoClient) => {
         this.client = client;
@@ -51,9 +52,6 @@ class DBClient {
         this.checklists = this.db.collection('checklists');
         this.checklistItems = this.db.collection('checklistItems');
         return client;
-      })
-      .catch((error) => {
-        throw new Error(error);
       });
   }
 
