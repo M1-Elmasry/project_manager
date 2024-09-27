@@ -35,7 +35,8 @@ class DBClient {
     this.port = port || DB_PORT;
     this.databaseName = databaseName || DB_NAME;
 
-    MongoClient.connect(`mongodb://${this.host}:${this.port}`)
+  async connect() {
+    return MongoClient.connect(`mongodb://${this.host}:${this.port}`)
       .then((client: MongoClient) => {
         this.client = client;
         this.db = this.client.db(this.databaseName);
@@ -48,19 +49,23 @@ class DBClient {
         this.tasks = this.db.collection('tasks');
         this.checklists = this.db.collection('checklists');
         this.checklistItems = this.db.collection('checklistItems');
-        console.log(`db connected on ${this.host}:${this.port}`);
+        return client;
       })
       .catch((error) => {
         throw new Error(error);
       });
   }
 
-  closeConnection() {
+  get is_connected(): boolean {
+    return !!this.client;
+  }
+
+  async close() {
     if (!this.client) {
       throw new Error('cannot close database connection before connecting');
     }
-    this.client.close();
-    console.log('db connection closed');
+    await this.client.close();
+    this.client = null;
   }
 }
 
