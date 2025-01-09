@@ -8,7 +8,7 @@ The docker image: [davenchy/project-manager](https://hub.docker.com/repository/d
 
 ## Table of Contents
 - [Minimum Viable Product (MVP) Features](#minimum-viable-product-mvp-features)
-- [Real-Time Event System](#real-time-event-system)
+- [Real-Time Event System](#real-time-event-system-not-implemented-yet)
 - [Technologies Used](#technologies-used)
 - [Project Status](#project-status)
 - [Installation and Setup](#installation-and-setup)
@@ -29,7 +29,7 @@ For our first release, we focused on implementing the following core features:
 - **Tasks:** A set of to-do lists representing the steps needed to complete a task.
 - **To-Do List:** A series of mini-tasks that serve as steps to complete a project task.
 
-## Real-Time Event System
+## Real-Time Event System (not implemented yet)
 
 Our project manager uses Server-Sent Events (SSE) to provide a real-time event system, enabling seamless team collaboration.
 
