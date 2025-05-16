@@ -52,8 +52,8 @@ To get the backend running locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Davenchy/project-manager-backend.git
-   cd project-manager-backend
+   git clone https://github.com/m1-elmasry/project_manager.git
+   cd project_manager
    ```
 2. Install dependencies:
    ```bash
